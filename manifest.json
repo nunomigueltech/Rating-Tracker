@@ -1,0 +1,20 @@
+{
+  "name": "Task Finder",
+  "version": "1.0",
+  "description": "Refreshes Lionbridge task pages in search of twerk.",
+  "options_page": "options.html",
+  "permissions": ["webNavigation"],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [ 
+    {
+    "matches": ["https://www.raterhub.com/*"],
+    "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/recent_tasks", 
+                        "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
+    "js": ["contentScript.js"]
+    }
+  ],
+  "manifest_version": 2
+}
