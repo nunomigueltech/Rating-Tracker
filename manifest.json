@@ -2,7 +2,6 @@
   "name": "Task Finder",
   "version": "1.0",
   "description": "Refreshes Lionbridge task pages in search of twerk.",
-  "options_page": "options.html",
   "permissions": ["webNavigation"],
   "background": {
     "scripts": ["background.js"],
