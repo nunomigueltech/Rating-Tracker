@@ -1,5 +1,5 @@
 {
-  "name": "Task Finder",
+  "name": "Rating Tracker",
   "version": "1.0",
   "description": "Refreshes Lionbridge task pages in search of twerk.",
   "permissions": ["webNavigation"],
