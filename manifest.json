@@ -9,8 +9,8 @@
   },
   "content_scripts": [ 
     {
-    "matches": ["https://www.raterhub.com/*"],
-    "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/recent_tasks", 
+    "matches": ["https://www.raterhub.com/rater*"],
+    "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/*", 
                         "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
     "js": ["contentScript.js"]
     }
