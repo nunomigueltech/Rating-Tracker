@@ -27,6 +27,16 @@ saveButton.onclick = function(element) {
     let minTime = parseInt(document.getElementById('minTime').value);
     let maxTime = parseInt(document.getElementById('maxTime').value);
 
+    if (minTime < 1) {
+        minTime = 1;
+        document.getElementById('minTime').value = minTime;
+    }
+    
+    if (maxTime < 1) {
+        maxTime = 1;
+        document.getElementById('maxTime').value = maxTime;
+    }
+
     if (minTime > maxTime) {
         minTime = maxTime;
         document.getElementById('minTime').value = minTime;
