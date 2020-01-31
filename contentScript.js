@@ -1,6 +1,3 @@
-
-var minTime = 1;
-var maxTime = 3;
 var isRunning = true;
 
 chrome.runtime.connect().onDisconnect.addListener(function() {
@@ -8,7 +5,7 @@ chrome.runtime.connect().onDisconnect.addListener(function() {
 });
 
 function checkWork() {
-    var taskList = document.querySelector('ul.ewok-rater-task-option');
+    let taskList = document.querySelector('ul.ewok-rater-task-option');
 
     if (taskList.innerText.includes("Acquire if available")) {
         chrome.runtime.sendMessage({status : "work-available"});
@@ -20,12 +17,15 @@ function handleRefresh() {
 
     window.location.reload();
     checkWork();
-
-    var waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
-    console.log('Waiting ' + waitTime + ' seconds.');
-    setTimeout(handleRefresh, waitTime * 1000);
 }
 
-var waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
-console.log('Waiting ' + waitTime + ' seconds.');
-setTimeout(handleRefresh, waitTime * 1000);
+var minTime = 0;
+var maxTime = 0;
+chrome.runtime.sendMessage({status : "return-time-interval"}, (response) => {
+    minTime = parseInt(response.value[0]);
+    maxTime = parseInt(response.value[1]);
+
+    let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
+    console.log('Waiting ' + waitTime + ' seconds.');
+    setTimeout(handleRefresh, waitTime * 1000);
+});
