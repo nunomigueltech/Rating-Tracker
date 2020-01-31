@@ -9,6 +9,8 @@ function checkWork() {
 
     if (taskList.innerText.includes("Acquire if available")) {
         chrome.runtime.sendMessage({status : "work-available"});
+    } else {
+        chrome.runtime.sendMessage({status : "work-unavailable"});
     }
 }
 
@@ -21,11 +23,19 @@ function handleRefresh() {
 
 var minTime = 0;
 var maxTime = 0;
-chrome.runtime.sendMessage({status : "return-time-interval"}, (response) => {
-    minTime = parseInt(response.value[0]);
-    maxTime = parseInt(response.value[1]);
 
-    let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
-    console.log('Waiting ' + waitTime + ' seconds.');
-    setTimeout(handleRefresh, waitTime * 1000);
+checkWork();
+chrome.runtime.sendMessage({status : "return-refresh-status"}, (response) => {
+    let refreshStatus = response.value;
+
+    if (refreshStatus) {
+        chrome.runtime.sendMessage({status : "return-time-interval"}, (response) => {
+            minTime = parseInt(response.value[0]);
+            maxTime = parseInt(response.value[1]);
+        
+            let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
+            console.log('Waiting ' + waitTime + ' seconds.');
+            setTimeout(handleRefresh, waitTime * 1000);
+        });
+    }
 });
