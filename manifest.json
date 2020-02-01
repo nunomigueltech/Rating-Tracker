@@ -3,16 +3,27 @@
   "version": "1.0",
   "description": "Refreshes Lionbridge task pages in search of twerk.",
   "permissions": ["webNavigation", "storage"],
+  "web_accessible_resources": [
+    "sounds/taskcomplete1.wav",
+    "sounds/taskcomplete2.wav",
+    "sounds/taskcomplete3.wav",
+    "sounds/taskcomplete4.wav"
+  ],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
   },
   "content_scripts": [ 
     {
-    "matches": ["https://www.raterhub.com/evaluation/rater*"],
-    "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/*", 
-                        "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
-    "js": ["refreshContentScript.js"]
+      "matches": ["https://www.raterhub.com/evaluation/rater*"],
+      "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/*", 
+                          "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
+      "js": ["refreshContentScript.js"]
+    },
+    {
+      "matches": ["https://www.raterhub.com/evaluation/rater/task/*"],
+      "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
+      "js": ["taskContentScript.js"]
     }
   ],
   "browser_action": {
