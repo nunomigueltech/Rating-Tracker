@@ -5,6 +5,7 @@ chrome.runtime.onConnect.addListener(port => {});
 var storage = [];
 var isRefreshing = true;
 
+// Messages used to share data with other scripts
 chrome.runtime.onMessage.addListener( 
   function(request, sender, sendResponse) {
     switch(request.status) {
@@ -33,12 +34,14 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
+// Store new setting changes
 chrome.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, value] of Object.entries(changes)) {
     storage[key] = value.newValue;
   }
 });
 
+// Initialize storage
 chrome.storage.sync.get(['minTime', 'maxTime'], (items) => {
   if (items == null) {
     console.log("Failed to load information from Google Chrome storage.");

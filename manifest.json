@@ -12,7 +12,7 @@
     "matches": ["https://www.raterhub.com/evaluation/rater*"],
     "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/*", 
                         "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
-    "js": ["contentScript.js"]
+    "js": ["refreshContentScript.js"]
     }
   ],
   "browser_action": {
