@@ -16,5 +16,4 @@ function handleTaskCompletion() {
     })
 }
 
-console.log("Waiting " + checkTaskTime() + " mins");
-setTimeout(handleTaskCompletion, checkTaskTime() * 1000);
+setTimeout(handleTaskCompletion, checkTaskTime() * 60000);
