@@ -7,17 +7,28 @@ var isRefreshing = true;
 
 chrome.runtime.onMessage.addListener( 
   function(request, sender, sendResponse) {
-    if (request.status == "work-available") {
-      isRefreshing = false;
-    }
-    if (request.status == "work-unavailable") {
-      isRefreshing = true;
-    }
-    if (request.status == "return-time-interval") {
-      sendResponse({value: [storage['minTime'], storage['maxTime']]});
-    }
-    if (request.status == "return-refresh-status") {
-      sendResponse({value: isRefreshing});
+    switch(request.status) {
+      case "work-available":
+        isRefreshing = false;
+
+        let taskSound = new Audio('sounds/taskaccept1.mp3')
+        taskSound.addEventListener("canplaythrough", event => {
+          taskSound.play();
+        });
+        break;
+
+      case "work-unavailable":
+        isRefreshing = true;
+        break;
+
+      // Supply refresh setting data to refresh content script
+      case "return-time-interval": 
+        sendResponse({value: [storage['minTime'], storage['maxTime']]});
+        break;
+
+      case "return-refresh-status":
+        sendResponse({value: isRefreshing});
+        break;
     }
   }
 );
