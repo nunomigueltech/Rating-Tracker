@@ -3,12 +3,6 @@
   "version": "1.0",
   "description": "Refreshes Lionbridge task pages in search of twerk.",
   "permissions": ["webNavigation", "storage"],
-  "web_accessible_resources": [
-    "sounds/taskcomplete1.wav",
-    "sounds/taskcomplete2.wav",
-    "sounds/taskcomplete3.wav",
-    "sounds/taskcomplete4.wav"
-  ],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
