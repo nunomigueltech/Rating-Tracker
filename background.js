@@ -25,16 +25,28 @@ var currentTask = {
     return currentTime - this.startTime;
   },
 
+  cancelTimeout() {
+    clearTimeout(this.timeout);
+  },
+
   clear() {
     this.time = 0.0;
-    clearTimeout(this.timeout);
+    this.cancelTimeout();
   }
 };
 
-// save task when complete
-function updateHours() {
+function getDateKey() {
   let date = new Date();
   var dateString = date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear();
+  
+  return dateString;
+}
+
+// save task when complete
+function updateHours() {
+  if (currentTask.time == 0.0) return;
+
+  var dateString = getDateKey();
   chrome.storage.sync.get(dateString, (items) => {
     let minutes = parseFloat(items[dateString]);
     if (typeof minutes === 'undefined') {
@@ -102,10 +114,22 @@ chrome.runtime.onMessage.addListener(
         if (request.id != currentTask.taskID) {
           if (currentTask.time != 0.0) {
             updateHours();
-            currentTask.clear();
           }
           currentTask.start(request.id, request.time, taskTimeout);
         }
+        break;
+
+      case 'cancel-task':
+        if (currentTask.time != 0.0) {
+          currentTask.cancelTimeout();
+          updateHours();
+        }
+        break;
+      
+      case 'hours-worked':
+        var dateKey = getDateKey();
+        let hoursWorked = (typeof storage[dateKey] === 'undefined')? 0.0 : storage[dateKey];
+        sendResponse({hours: hoursWorked});
         break;
     }
   }
@@ -118,13 +142,17 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-// Initialize storage
-chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
-                         'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
-                         'timeoutSoundVolumeSetting'], (items) => {
-  if (items == null) {
-    console.log("Failed to load information from Google Chrome storage.");
-  } else {
-    storage = items;
-  }
-});
+function initializeStorage() {
+  var dateKey = getDateKey();
+  chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
+                           'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
+                           'timeoutSoundVolumeSetting', dateKey], (items) => {
+    if (items == null) {
+      console.log("Failed to load information from Google Chrome storage.");
+    } else {
+      storage = items;
+    }
+  });
+}
+
+initializeStorage();
