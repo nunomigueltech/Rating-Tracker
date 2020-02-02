@@ -4,9 +4,9 @@ chrome.runtime.connect().onDisconnect.addListener(function() {
     isRunning = false;
 });
 
+// NO TASKS CLASS - h2. ewok-rater-task-header ewok-rater-no-tasks
 function checkWork() {
-    let taskList = document.querySelector('ul.ewok-rater-task-option');
-
+    let taskList = document.querySelector('div.container');
     if (taskList.innerText.includes("Acquire if available")) {
         chrome.runtime.sendMessage({status : "work-available"});
     } else {
@@ -30,12 +30,16 @@ chrome.runtime.sendMessage({status : "return-refresh-status"}, (response) => {
 
     if (refreshStatus) {
         chrome.runtime.sendMessage({status : "return-time-interval"}, (response) => {
-            minTime = parseInt(response.value[0]);
-            maxTime = parseInt(response.value[1]);
-        
-            let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
-            console.log('Waiting ' + waitTime + ' seconds.');
-            setTimeout(handleRefresh, waitTime * 1000);
+            let refreshEnabled = response.value[0];
+
+            if (refreshEnabled) {
+                minTime = parseInt(response.value[1]);
+                maxTime = parseInt(response.value[2]);
+            
+                let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
+                console.log('Waiting ' + waitTime + ' seconds.');
+                setTimeout(handleRefresh, waitTime * 1000);
+            }
         });
     }
 });

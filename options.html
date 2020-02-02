@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        #title {
+            margin: 0 auto;
+            max-width: 1200px;
+            font-size: 50px;
+            color: #1e2022
+        }
+        #bg {
+            padding-top: 25px;
+        }
+        #content {
+            border-style: solid;
+            max-width: 1200px;
+            min-width: 1200px;
+            height: 400px;
+            margin: 0 auto;
+            background-color: #f0f5f9;
+            border-color: #52616b;
+            border-radius: 0.5%;
+        }
+        #inner-content {
+            padding: 10px;
+        }
+
+        #tab1, #tab2, #tab3 {
+            float: left;
+            padding: 5px 50px 5px 50px;
+            background: #52616b;
+            color: #FFFFFF;
+            margin: 0px 5px 0px 5px;
+            cursor: pointer;
+            border-radius: 2px;
+            margin-left: 5px;
+        }
+
+        #tab1:hover, #tab2:hover, #tab3:hover {
+        background: #c9d6df;
+        }
+
+        #tab1Content, #tab2Content, #tab3Content {
+            width: 1100px;
+            height: 700px;
+            padding: 20px;
+
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+
+        #tab1Content {
+        display: block; 
+        }
+
+        #tab2Content, #tab3Content {
+            display: none; 
+        }
+
+        #tab2Content input {
+            width: 25px;
+            padding-left: 10px;
+            padding-right: 10px;
+            -webkit-user-select: none;   
+        }
+
+        #tab2Content input:focus {
+            outline-width: 0;
+        }
+
+        .column {
+            float: left;
+            width: 33.33%;
+        }
+
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .slider {
+            width: 300px;
+        }
+
+        #saveSettings {
+            display: table;
+            margin: 0 auto;
+        }
+
+        #resetStorage {
+            display: table;
+            margin: 0 auto;
+            margin-top: 300px;
+        }
+
+        #weeklyView {
+            table-layout: fixed;
+            border-collapse: collapse;
+            border: 1px solid #1e2022;
+            width: 1100px;
+            height: 125px;
+            text-align: center;
+        }
+
+        #weeklyView th {
+            border-collapse: collapse;
+            border: 1px solid #1e2022;
+            height: 25px;
+            background-color: #c9d6df;
+        }
+        
+        #weeklyView td {
+            border-collapse: collapse;
+            border: 1px solid #1e2022;
+        }
+
+        #weeklyViewNavigation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="bg" width="100%">
+        <div id="title">Rating Tracker Options</div>
+        <div id="content">
+            <div id="inner-content">
+                <div id="tab1">General</div>
+                <div id="tab2">Hour View</div>
+                <div id="tab3">About</div>
+                <br/>
+
+                <div id="tab1Content">
+                    <div class="row">
+                        <div class="column">
+                            <input type="radio" id="refreshEnabled" name="refresh-setting" value="enable" checked> <b>Enable</b> page refreshing <br>
+                            <input type="radio" id="refreshDisabled" name="refresh-setting" value="disable"> <b>Disable</b> page refreshing <br><br>
+                            <b>Refresh Settings</b> 
+                            
+                            <br>
+                            Waits between <b>min</b> and <b>max</b> seconds.
+                            <table> 
+                                <tr>
+                                    <td>Minimum Time:</td>
+                                    <td><input id="minTime" type="number"></input></td>
+                                </tr>
+                                <tr>
+                                    <td>Maximum Time:</td>
+                                    <td><input id="maxTime" type="number"></input></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="column">
+                            <b>Sound Settings</b> 
+                            <br>
+                            <input type="checkbox" id="soundTaskFound" checked> Play a sound when tasks are available after a refresh
+                            <br>
+                            <input type="range" min="1" max="100" value="100" class="slider" id="soundLevelTaskFound">
+                            <Br> <bR>
+                            <input type="checkbox" id="soundTaskTimeout" checked> Play a sound when the task reaches the AET
+                            <br>
+                            <input type="range" min="1" max="100" value="100" class="slider" id="soundLevelTaskTimeout">
+                        </div>
+                        <div class="column">
+                            <button id="saveSettings" type="button">Save Settings</button>
+                            <button id="resetStorage" type="button">Clear Storage</button>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div id="tab2Content">
+                    <div id="weeklyViewNavigation">
+                        <input type="image" src="images/left-arrow.png" id="prevWeekButton"/>
+                        <div id="navigationHeader">First day - Last day</div>
+                        <input type="image" src="images/right-arrow.png" id="nextWeekButton"/>
+                    </div>
+                    <br>
+                    <table id="weeklyView">
+                        <tr>
+                            <th>Sunday</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <th id="day0">Date</th>
+                            <th id="day1">Date</th id="day0">
+                            <th id="day2">Date</th id="day0">
+                            <th id="day3">Date</th id="day0">
+                            <th id="day4">Date</th>
+                            <th id="day5">Date</th id="day0">
+                            <th id="day6">Date</th id="day0">
+                            <th>Total</th id="day0">
+                        </tr>
+                        <tr>
+                            <td id="day0Total">0.0 hours</td>
+                            <td id="day1Total">0.0 hours</td>
+                            <td id="day2Total">0.0 hours</td id="day0total">
+                            <td id="day3Total">0.0 hours</td id="day0total">
+                            <td id="day4Total">0.0 hours</td id="day0total">
+                            <td id="day5Total">0.0 hours</td id="day0total">
+                            <td id="day6Total">0.0 hours</td id="day0total">
+                            <td id="weekTotal">0.0 hours</td id="day0total">
+                        </tr>
+                    </table>
+                </div>
+
+                <div id="tab3Content">
+                    <p>This extension abides by Lionbridge's Terms of Service and privacy requirements.
+                        The only information that it stores about your work sessions is the time that you 
+                        spend on the job site. It is written to support Chrome Sync, so your extension settings 
+                        and work hours are backed-up across your devices.
+                    </p>
+                    <h4>Written by Nuno Rodrigues</h4>
+                    Navigation icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>       
+                </div>
+            </div>
+        </div>     
+    </div>
+  </body>
+  <script src="options.js"></script>
+</html>

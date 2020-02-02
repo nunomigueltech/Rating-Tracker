@@ -2,23 +2,21 @@
 <html>
   <head>
     <style>
+      #openSettings {
+        margin: 0 auto;
+        width: 200px;
+      }
+      #content {
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <b>Refresh Settings</b> 
-    <br>
-    Waits between <b>min</b> and <b>max</b> seconds.
-    <table> 
-        <tr>
-            <td>Minimum Time:</td>
-            <td><input id="minTime" type="number"></input></td>
-        </tr>
-        <tr>
-            <td>Maximum Time:</td>
-            <td><input id="maxTime" type="number"></input></td>
-        </tr>
-    </table>
-    <button id="saveSettings" type="button">Save Settings</button>
+    <div id="content">
+      <h4>0.0 / 8.0 hours worked</h4>
+      <button id="openSettings" type="button">Open Settings</button>
+    </div>
+    
     <script src="popup.js" type="text/javascript"></script>
   </body>
 </html>

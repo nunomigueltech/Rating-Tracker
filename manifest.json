@@ -2,15 +2,19 @@
   "name": "Rating Tracker",
   "version": "1.0",
   "description": "Refreshes Lionbridge task pages in search of twerk.",
-  "permissions": ["webNavigation", "storage"],
+  "permissions": ["webNavigation", "storage", "tabs"],
+  "web_accessible_resources": [
+    "images/*.png"
+  ],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
   },
+  "options_page": "options.html",
   "content_scripts": [ 
     {
       "matches": ["https://www.raterhub.com/evaluation/rater*"],
-      "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/*", 
+      "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/task/show*", 
                           "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
       "js": ["refreshContentScript.js"]
     },

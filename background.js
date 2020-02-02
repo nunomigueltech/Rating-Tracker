@@ -8,6 +8,7 @@ var currentTask = {
   time: 0.0,
   taskID: '',  
   timeout: null,
+
   start(taskID, time, func) {
     let date = new Date();
     this.startTime = date.getTime();
@@ -16,12 +17,14 @@ var currentTask = {
     this.time = parseFloat(time) * 60000.0;
     this.timeout = window.setTimeout(func, this.time);
   },
+
   // calculates the time passed in milliseconds
   timePassed() {
     let date = new Date();
     let currentTime = Date.now();
     return currentTime - this.startTime;
   },
+
   clear() {
     this.time = 0.0;
     clearTimeout(this.timeout);
@@ -33,9 +36,9 @@ function updateHours() {
   let date = new Date();
   var dateString = date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear();
   chrome.storage.sync.get(dateString, (items) => {
-    let minutes = 0.0;
-    if (items != null) {
-      minutes = parseFloat(items[dateString]);
+    let minutes = parseFloat(items[dateString]);
+    if (typeof minutes === 'undefined') {
+      minutes = 0.0;
     } 
 
     let minutesPassed = currentTask.timePassed() / 60000;
@@ -52,15 +55,18 @@ function updateHours() {
 
 // play sound when task times out
 function taskTimeout() {
-  let soundID = Math.ceil(Math.random() * 4);
-  let soundName = 'taskcomplete' + soundID + '.wav';
+  if (storage['timeoutSoundSetting']) {
+    let soundID = Math.ceil(Math.random() * 4);
+    let soundName = 'taskcomplete' + soundID + '.wav';
+  
+    let sound = new Audio('sounds/' + soundName);
+    sound.volume = parseInt(storage['timeoutSoundVolumeSetting'])/100.0;
+    sound.addEventListener("canplaythrough", event => {
+        sound.play();
+    });
+  }
 
-  let sound = new Audio('sounds/' + soundName);
-  sound.addEventListener("canplaythrough", event => {
-      sound.play();
-  });
-
-  updateHours();6
+  updateHours();
 }
 
 // Messages used to share data with other scripts
@@ -70,10 +76,13 @@ chrome.runtime.onMessage.addListener(
       case 'work-available':
         isRefreshing = false;
 
-        let taskSound = new Audio('sounds/taskaccept1.mp3')
-        taskSound.addEventListener('canplaythrough', event => {
-          taskSound.play();
-        });
+        if (storage['refreshSoundSetting']) {
+          let taskSound = new Audio('sounds/taskaccept1.mp3')
+          taskSound.volume = parseInt(storage['refreshSoundVolumeSetting'])/100.0;
+          taskSound.addEventListener('canplaythrough', event => {
+            taskSound.play();
+          });
+        }
         break;
 
       case 'work-unavailable':
@@ -82,7 +91,7 @@ chrome.runtime.onMessage.addListener(
 
       // Supply refresh setting data to refresh content script
       case 'return-time-interval': 
-        sendResponse({value: [storage['minTime'], storage['maxTime']]});
+        sendResponse({value: [storage['refreshSetting'], storage['minTime'], storage['maxTime']]});
         break;
 
       case 'return-refresh-status':
@@ -110,7 +119,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 });
 
 // Initialize storage
-chrome.storage.sync.get(['minTime', 'maxTime'], (items) => {
+chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
+                         'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
+                         'timeoutSoundVolumeSetting'], (items) => {
   if (items == null) {
     console.log("Failed to load information from Google Chrome storage.");
   } else {
