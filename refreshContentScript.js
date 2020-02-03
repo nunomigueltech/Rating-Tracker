@@ -7,7 +7,7 @@ chrome.runtime.connect().onDisconnect.addListener(function() {
 // NO TASKS CLASS - h2. ewok-rater-task-header ewok-rater-no-tasks
 function checkWork() {
     let taskList = document.querySelector('div.container');
-    if (taskList.innerText.includes('Acquire if available')) {
+    if (taskList.innerText.includes('Acquire if available') || taskList.innerText.includes('Incomplete Tasks')) {
         chrome.runtime.sendMessage({status : 'work-available'});
     } else {
         chrome.runtime.sendMessage({status : 'work-unavailable'});
