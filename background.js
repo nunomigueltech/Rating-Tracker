@@ -74,19 +74,13 @@ function calculateWeekHours() {
 
 // save task when complete
 function updateHours() {
-  console.log("Trying to log time")
   if (currentTask.time == 0.0) return;
-  console.log("Logging now..")
 
   var dateString = getDateKey();
   chrome.storage.sync.get(dateString, (items) => {
-    let minutes = parseFloat(items[dateString]);
-    if (typeof minutes === 'undefined') {
-      console.log("Encountered undefined mins")
-      minutes = 0.0;
-    } 
-
+    let minutes = (typeof items[dateString] === 'undefined')? 0.0 : parseFloat(items[dateString]);
     let minutesPassed = currentTask.timePassed() / 60000;
+
     if (minutesPassed < currentTask.time) {
       minutes += minutesPassed;
     } else {
