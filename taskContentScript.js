@@ -11,7 +11,7 @@ function getTaskID() {
     return taskID[1];
 }
 
-let stopButton = document.querySelector('button.ewok-task-submit-done-button');
+let stopButton = document.querySelector('button#ewok-task-submit-done-button');
 stopButton.onclick = (element) => {
     chrome.runtime.sendMessage({status : "cancel-task"});
 };

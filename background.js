@@ -4,6 +4,8 @@ chrome.runtime.onConnect.addListener(port => {});
 
 var isRefreshing = true;
 var storage = [];
+var weekMinutesWorked = 0.0; // used to provide constant time access to pop-up script
+
 var currentTask = {
   time: 0.0,
   taskID: '',  
@@ -35,11 +37,37 @@ var currentTask = {
   }
 };
 
-function getDateKey() {
-  let date = new Date();
-  var dateString = date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear();
+function getSpecificDateKey(dateObj) {
+  var dateString = dateObj.getMonth() + '/' + dateObj.getDate() + '/' + dateObj.getFullYear();
   
   return dateString;
+}
+
+function getDateKey() {
+  let date = new Date();
+
+  return getSpecificDateKey(date);
+}
+
+function calculateWeekHours() {
+  let date = new Date();
+  date.setDate(date.getDate() - date.getDay());
+
+  let dateKeys = [];
+  for (let i = 0; i < 7; i++) {
+    dateKeys[i] = getSpecificDateKey(date);
+    date.setDate(date.getDate() + 1);
+  }
+
+  let totalMinutes = 0.0;
+  chrome.storage.sync.get(dateKeys, (items) => {
+    let values = Object.values(items)
+    for (let i = 0; i < values.length; i++) {
+      totalMinutes += parseFloat(values[i]);
+    }
+
+    weekMinutesWorked = totalMinutes;
+  });
 }
 
 // save task when complete
@@ -126,10 +154,14 @@ chrome.runtime.onMessage.addListener(
         }
         break;
       
-      case 'hours-worked':
+      case 'hours-worked-day':
         var dateKey = getDateKey();
         let hoursWorked = (typeof storage[dateKey] === 'undefined')? 0.0 : storage[dateKey];
         sendResponse({hours: hoursWorked});
+        break;
+
+      case 'hours-worked-week':
+        sendResponse({hours: weekMinutesWorked});
         break;
     }
   }
@@ -138,6 +170,11 @@ chrome.runtime.onMessage.addListener(
 // Store new setting changes
 chrome.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, value] of Object.entries(changes)) {
+    let todaysDateKey = getDateKey();
+    if (key === todaysDateKey) {
+      weekHours += (parseFloat(value)/60.0);
+    }
+
     storage[key] = value.newValue;
   }
 });
@@ -156,3 +193,4 @@ function initializeStorage() {
 }
 
 initializeStorage();
+calculateWeekHours();

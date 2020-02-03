@@ -19,7 +19,7 @@
       "js": ["refreshContentScript.js"]
     },
     {
-      "matches": ["https://www.raterhub.com/evaluation/rater/task/*"],
+      "matches": ["https://www.raterhub.com/evaluation/rater/task/show*"],
       "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks"],
       "js": ["taskContentScript.js"]
     }
