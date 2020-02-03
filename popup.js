@@ -1,6 +1,6 @@
 let settingsButton = document.getElementById('openSettings');
 settingsButton.onclick = function(element) {
-    chrome.tabs.create({url: "options.html"});
+    chrome.runtime.openOptionsPage();
 };
 
 // request data and settings from background script to initialize fields
