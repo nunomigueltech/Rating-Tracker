@@ -193,7 +193,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, value] of Object.entries(changes)) {
     let todaysDateKey = getDateKey();
     if (key === todaysDateKey) {
-      minutesWorkedWeek += (parseFloat(value.newValue)/60.0);
+      let addedTime = parseFloat(value.newValue) - parseFloat(value.oldValue);
+      minutesWorkedWeek += addedTime;
     }
 
     if (key === 'refreshTimerSetting') {

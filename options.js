@@ -47,7 +47,7 @@ resetButton.onclick = (element) => {
     }
 };
 
-function loadWeek(dateObject, dayCounter, hours) {
+function loadWeek(dateObject, dayCounter, minutes) {
     if (dayCounter > 6 || dayCounter < 0) return;
 
     let dateEntries = document.getElementById('weeklyView').rows[1].cells;
@@ -60,18 +60,20 @@ function loadWeek(dateObject, dayCounter, hours) {
         let minutesWorked = (typeof data[dayKey] === 'undefined')? 0.0 : parseInt(data[dayKey]);
         let hoursWorked = minutesWorked/60.0;
 
-        hours += hoursWorked;
+        minutes += minutesWorked;
         hourEntries[dayCounter].innerHTML = hoursWorked.toFixed(2) + ' hours';
         if (dayCounter == 6) {
             // when all entries are loaded for the week, store the total and update
             // the navigation label
             let navigationLabel = document.getElementById('navigationHeader');
             navigationLabel.innerHTML = dateEntries[0].innerHTML + ' - ' + dateEntries[6].innerHTML;
-            hourEntries[7].innerHTML = hours.toFixed(2) + ' hours';
+
+            let hoursWorked = minutes/60;
+            hourEntries[7].innerHTML = hoursWorked.toFixed(2) + ' hours';
         }
       
         dateObject.setDate(dateObject.getDate() + 1);
-        loadWeek(dateObject, dayCounter + 1, hours);
+        loadWeek(dateObject, dayCounter + 1, minutes);
     });
 }
 
