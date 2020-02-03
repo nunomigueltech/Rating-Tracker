@@ -95,6 +95,11 @@ nextWeekButton.onclick = (element) => {
     weekOffset += 1;
     loadHourView();
 };
+
+function fadeoutSavedLabel() {
+    let savedLabel = document.getElementById('save-confirmation');
+    savedLabel.style.opacity = '0';
+}
 // END OF UI HANDLING
 
 // START OF INTERNAL HANDLING
@@ -219,6 +224,11 @@ saveButton.onclick = function(element) {
     chrome.storage.sync.set({'timeoutSoundVolumeSetting' : timeoutSoundVolumeSetting});
     chrome.storage.sync.set({'dailyHourDisplaySetting' : dailyHourDisplaySetting});
     chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplaySetting});
+
+    // update save notification
+    let savedLabel = document.getElementById('save-confirmation');
+    savedLabel.style.opacity = '1';
+    window.setTimeout(fadeoutSavedLabel, 3000);
 }
 
 loadSettings();
