@@ -5,6 +5,8 @@ chrome.runtime.onConnect.addListener(port => {});
 var isRefreshing = true;
 var storage = [];
 var minutesWorkedWeek = 0.0; // used to provide constant time access to pop-up script
+var globalRefreshTime = 0;
+var globalRefreshInterval = null;
 
 var currentTask = {
   time: 0.0,
@@ -72,12 +74,15 @@ function calculateWeekHours() {
 
 // save task when complete
 function updateHours() {
+  console.log("Trying to log time")
   if (currentTask.time == 0.0) return;
+  console.log("Logging now..")
 
   var dateString = getDateKey();
   chrome.storage.sync.get(dateString, (items) => {
     let minutes = parseFloat(items[dateString]);
     if (typeof minutes === 'undefined') {
+      console.log("Encountered undefined mins")
       minutes = 0.0;
     } 
 
@@ -89,6 +94,7 @@ function updateHours() {
     }
 
     currentTask.clear();
+    console.log("Worked a total of " + minutes)
     chrome.storage.sync.set({[dateString] : minutes});
   });
 }
@@ -109,13 +115,29 @@ function taskTimeout() {
   updateHours();
 }
 
+function resetRefreshTimer() {
+  clearInterval(globalRefreshInterval);
+  chrome.browserAction.setBadgeText({text: ''});
+}
+
+// updates extension badge text to keep track of current refresh timer
+function updateRefreshTimer() {
+  if (globalRefreshTime < 0) {
+    resetRefreshTimer();
+  } else {
+    chrome.browserAction.setBadgeText({text: globalRefreshTime + ''});
+    globalRefreshTime--;
+  }
+}
+
 // Messages used to share data with other scripts
 chrome.runtime.onMessage.addListener( 
   function(request, sender, sendResponse) {
     switch(request.status) {
       case 'work-available':
         isRefreshing = false;
-
+        resetRefreshTimer();
+        
         if (storage['refreshSoundSetting']) {
           let taskSound = new Audio('sounds/taskaccept1.mp3')
           taskSound.volume = parseInt(storage['refreshSoundVolumeSetting'])/100.0;
@@ -161,6 +183,13 @@ chrome.runtime.onMessage.addListener(
         let displayWeeklyHoursEnabled = (typeof storage['weeklyHourDisplaySetting'] === 'undefined')? true : storage['weeklyHourDisplaySetting'];
         sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled]});
         break;
+
+      case 'refresh-timer':
+        // start icon badge timer when refresh time is received from content script
+        globalRefreshTime = request.time - 1;
+        resetRefreshTimer();
+        globalRefreshInterval = setInterval(updateRefreshTimer, 1000);
+        break;
     }
   }
 );
@@ -170,7 +199,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, value] of Object.entries(changes)) {
     let todaysDateKey = getDateKey();
     if (key === todaysDateKey) {
-      weekHours += (parseFloat(value)/60.0);
+      minutesWorkedWeek += (parseFloat(value.newValue)/60.0);
     }
 
     storage[key] = value.newValue;
