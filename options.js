@@ -102,13 +102,14 @@ function loadSettings() {
     chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
                              'refreshSoundVolumeSetting', 'timeoutSoundSetting',
                              'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
-                             'weeklyHourDisplaySetting'], function(data) { 
+                             'weeklyHourDisplaySetting', 'refreshTimerSetting'], function(data) { 
 
         let minTime = data['minTime'];
         let maxTime = data['maxTime'];
         let refreshEnabled = data['refreshSetting'];
         let refreshSoundEnabled = data['refreshSoundSetting'];
         let refreshSoundVolume = data['refreshSoundVolumeSetting'];
+        let refreshTimerEnabled = data['refreshTimerSetting'];
         let timeoutSoundEnabled = data['timeoutSoundSetting'];
         let timeoutSoundVolume = data['timeoutSoundVolumeSetting'];
         let dailyHourDisplayEnabled = data['dailyHourDisplaySetting'];
@@ -139,6 +140,12 @@ function loadSettings() {
             chrome.storage.sync.set({'refreshSoundVolumeSetting' : refreshSoundVolume});
         }
 
+        if (typeof refreshTimerEnabled === 'undefined') {
+            refreshTimerEnabled = true;
+            chrome.storage.sync.set({'refreshTimerSetting' : refreshTimerEnabled});
+        }
+
+
         if (typeof timeoutSoundEnabled === 'undefined') {
             timeoutSoundEnabled = true;
             chrome.storage.sync.set({'timeoutSoundSetting' : timeoutSoundEnabled});
@@ -164,6 +171,7 @@ function loadSettings() {
         document.getElementById('refreshEnabled').checked = refreshEnabled;
         document.getElementById('refreshDisabled').checked = !refreshEnabled;
         document.getElementById('soundTaskFound').checked = refreshSoundEnabled;
+        document.getElementById('displayRefreshTimer').checked = refreshTimerEnabled;
         document.getElementById('soundLevelTaskFound').value = refreshSoundVolume;
         document.getElementById('soundTaskTimeout').checked = timeoutSoundEnabled;
         document.getElementById('soundLevelTaskTimeout').value = timeoutSoundVolume;
@@ -180,6 +188,7 @@ saveButton.onclick = function(element) {
     let refreshSetting = document.getElementById('refreshEnabled').checked;
     let refreshSoundSetting = document.getElementById('soundTaskFound').checked;
     let refreshSoundVolumeSetting = parseInt(document.getElementById('soundLevelTaskFound').value);
+    let refreshTimerSetting = document.getElementById('displayRefreshTimer').checked;
     let timeoutSoundSetting = document.getElementById('soundTaskTimeout').checked;
     let timeoutSoundVolumeSetting = parseInt(document.getElementById('soundLevelTaskTimeout').value);
     let dailyHourDisplaySetting = document.getElementById('displayHoursDay').checked;
@@ -205,6 +214,7 @@ saveButton.onclick = function(element) {
     chrome.storage.sync.set({'refreshSetting' : refreshSetting});
     chrome.storage.sync.set({'refreshSoundSetting' : refreshSoundSetting});
     chrome.storage.sync.set({'refreshSoundVolumeSetting' : refreshSoundVolumeSetting});
+    chrome.storage.sync.set({'refreshTimerSetting' : refreshTimerSetting});
     chrome.storage.sync.set({'timeoutSoundSetting' : timeoutSoundSetting});
     chrome.storage.sync.set({'timeoutSoundVolumeSetting' : timeoutSoundVolumeSetting});
     chrome.storage.sync.set({'dailyHourDisplaySetting' : dailyHourDisplaySetting});

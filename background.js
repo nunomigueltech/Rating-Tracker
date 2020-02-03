@@ -1,5 +1,5 @@
 'use strict';
-
+ 
 chrome.runtime.onConnect.addListener(port => {});
 
 var isRefreshing = true;
@@ -147,7 +147,7 @@ chrome.runtime.onMessage.addListener(
 
       // Supply refresh setting data to refresh content script
       case 'return-time-interval': 
-        sendResponse({value: [storage['refreshSetting'], storage['minTime'], storage['maxTime']]});
+        sendResponse({value: [storage['refreshSetting'], storage['minTime'], storage['maxTime']], refreshTimerEnabled: storage['refreshTimerSetting']});
         break;
 
       case 'return-refresh-status':
@@ -196,6 +196,12 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       minutesWorkedWeek += (parseFloat(value.newValue)/60.0);
     }
 
+    if (key === 'refreshTimerSetting') {
+      if (!value.newValue) {
+        resetRefreshTimer();
+      }
+    }
+
     storage[key] = value.newValue;
   }
 });
@@ -205,7 +211,8 @@ function initializeStorage() {
   chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
                            'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
                            'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
-                           'weeklyHourDisplaySetting', dateKey], (items) => {
+                           'weeklyHourDisplaySetting', 'refreshTimerSetting', 
+                           dateKey], (items) => {
     if (items == null) {
       console.log("Failed to load information from Google Chrome storage.");
     } else {
