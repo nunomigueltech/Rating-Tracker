@@ -4,7 +4,7 @@ chrome.runtime.onConnect.addListener(port => {});
 
 var isRefreshing = true;
 var storage = [];
-var weekMinutesWorked = 0.0; // used to provide constant time access to pop-up script
+var minutesWorkedWeek = 0.0; // used to provide constant time access to pop-up script
 
 var currentTask = {
   time: 0.0,
@@ -66,7 +66,7 @@ function calculateWeekHours() {
       totalMinutes += parseFloat(values[i]);
     }
 
-    weekMinutesWorked = totalMinutes;
+    minutesWorkedWeek = totalMinutes;
   });
 }
 
@@ -154,14 +154,12 @@ chrome.runtime.onMessage.addListener(
         }
         break;
       
-      case 'hours-worked-day':
+      case 'popup-data':
         var dateKey = getDateKey();
-        let hoursWorked = (typeof storage[dateKey] === 'undefined')? 0.0 : storage[dateKey];
-        sendResponse({hours: hoursWorked});
-        break;
-
-      case 'hours-worked-week':
-        sendResponse({hours: weekMinutesWorked});
+        let minutesWorkedToday = (typeof storage[dateKey] === 'undefined')? 0.0 : storage[dateKey];
+        let displayDailyHoursEnabled = (typeof storage['dailyHourDisplaySetting'] === 'undefined')? true : storage['dailyHourDisplaySetting'];
+        let displayWeeklyHoursEnabled = (typeof storage['weeklyHourDisplaySetting'] === 'undefined')? true : storage['weeklyHourDisplaySetting'];
+        sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled]});
         break;
     }
   }
@@ -183,7 +181,8 @@ function initializeStorage() {
   var dateKey = getDateKey();
   chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
                            'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
-                           'timeoutSoundVolumeSetting', dateKey], (items) => {
+                           'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
+                           'weeklyHourDisplaySetting', dateKey], (items) => {
     if (items == null) {
       console.log("Failed to load information from Google Chrome storage.");
     } else {

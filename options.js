@@ -101,7 +101,8 @@ nextWeekButton.onclick = (element) => {
 function loadSettings() {
     chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
                              'refreshSoundVolumeSetting', 'timeoutSoundSetting',
-                             'timeoutSoundVolumeSetting'], function(data) { 
+                             'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
+                             'weeklyHourDisplaySetting'], function(data) { 
 
         let minTime = data['minTime'];
         let maxTime = data['maxTime'];
@@ -110,6 +111,8 @@ function loadSettings() {
         let refreshSoundVolume = data['refreshSoundVolumeSetting'];
         let timeoutSoundEnabled = data['timeoutSoundSetting'];
         let timeoutSoundVolume = data['timeoutSoundVolumeSetting'];
+        let dailyHourDisplayEnabled = data['dailyHourDisplaySetting'];
+        let weeklyHourDisplayEnabled = data['weeklyHourDisplaySetting'];
 
         if (typeof minTime === 'undefined') {
             minTime = 30;
@@ -146,6 +149,16 @@ function loadSettings() {
             chrome.storage.sync.set({'timeoutSoundVolumeSetting' : timeoutSoundVolume});
         }
 
+        if (typeof dailyHourDisplayEnabled === 'undefined') {
+            dailyHourDisplayEnabled = true;
+            chrome.storage.sync.set({'dailyHourDisplaySetting' : dailyHourDisplayEnabled});
+        }
+
+        if (typeof weeklyHourDisplayEnabled === 'undefined') {
+            weeklyHourDisplayEnabled = true;
+            chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplayEnabled});
+        }
+
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
         document.getElementById('refreshEnabled').checked = refreshEnabled;
@@ -154,6 +167,8 @@ function loadSettings() {
         document.getElementById('soundLevelTaskFound').value = refreshSoundVolume;
         document.getElementById('soundTaskTimeout').checked = timeoutSoundEnabled;
         document.getElementById('soundLevelTaskTimeout').value = timeoutSoundVolume;
+        document.getElementById('displayHoursDay').checked = dailyHourDisplayEnabled;
+        document.getElementById('displayHoursWeek').checked = weeklyHourDisplayEnabled;
         updateRefreshFields(!refreshEnabled);
     });
 }
@@ -167,6 +182,8 @@ saveButton.onclick = function(element) {
     let refreshSoundVolumeSetting = parseInt(document.getElementById('soundLevelTaskFound').value);
     let timeoutSoundSetting = document.getElementById('soundTaskTimeout').checked;
     let timeoutSoundVolumeSetting = parseInt(document.getElementById('soundLevelTaskTimeout').value);
+    let dailyHourDisplaySetting = document.getElementById('displayHoursDay').checked;
+    let weeklyHourDisplaySetting = document.getElementById('displayHoursWeek').checked;
 
     if (minTime < 1) {
         minTime = 1;
@@ -190,6 +207,8 @@ saveButton.onclick = function(element) {
     chrome.storage.sync.set({'refreshSoundVolumeSetting' : refreshSoundVolumeSetting});
     chrome.storage.sync.set({'timeoutSoundSetting' : timeoutSoundSetting});
     chrome.storage.sync.set({'timeoutSoundVolumeSetting' : timeoutSoundVolumeSetting});
+    chrome.storage.sync.set({'dailyHourDisplaySetting' : dailyHourDisplaySetting});
+    chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplaySetting});
 }
 
 loadSettings();
