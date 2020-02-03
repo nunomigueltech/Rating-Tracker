@@ -12,10 +12,12 @@ var currentTask = {
   time: 0.0,
   taskID: '',  
   timeout: null,
+  active: false,
 
   start(taskID, time, func) {
     let date = new Date();
     this.startTime = date.getTime();
+    this.active = true;
 
     this.taskID = taskID;
     this.time = parseFloat(time) * 60000.0;
@@ -24,7 +26,6 @@ var currentTask = {
 
   // calculates the time passed in milliseconds
   timePassed() {
-    let date = new Date();
     let currentTime = Date.now();
     return currentTime - this.startTime;
   },
@@ -34,7 +35,7 @@ var currentTask = {
   },
 
   clear() {
-    this.time = 0.0;
+    this.active = false;
     this.cancelTimeout();
   }
 };
@@ -74,7 +75,7 @@ function calculateWeekHours() {
 
 // save task when complete
 function updateHours() {
-  if (currentTask.time == 0.0) return;
+  if (!currentTask.active) return;
 
   var dateString = getDateKey();
   chrome.storage.sync.get(dateString, (items) => {
@@ -88,7 +89,6 @@ function updateHours() {
     }
 
     currentTask.clear();
-    console.log("Worked a total of " + minutes)
     chrome.storage.sync.set({[dateString] : minutes});
   });
 }
@@ -105,8 +105,6 @@ function taskTimeout() {
         sound.play();
     });
   }
-
-  updateHours();
 }
 
 function resetRefreshTimer() {
@@ -156,16 +154,18 @@ chrome.runtime.onMessage.addListener(
 
       case 'new-task':
         if (request.id != currentTask.taskID) {
-          if (currentTask.time != 0.0) {
-            updateHours();
-          }
           currentTask.start(request.id, request.time, taskTimeout);
         }
         break;
 
       case 'cancel-task':
-        if (currentTask.time != 0.0) {
-          currentTask.cancelTimeout();
+        if (currentTask.active) {
+          currentTask.clear();
+        }
+        break;
+
+      case 'submit-task':
+        if (currentTask.active) {
           updateHours();
         }
         break;

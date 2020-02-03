@@ -11,9 +11,28 @@ function getTaskID() {
     return taskID[1];
 }
 
+let submitButton = document.querySelector('button#ewok-task-submit-button');
+submitButton.onclick = (element) => {
+    chrome.runtime.sendMessage({status : "submit-task"});
+};
+
 let stopButton = document.querySelector('button#ewok-task-submit-done-button');
 stopButton.onclick = (element) => {
+    chrome.runtime.sendMessage({status : "submit-task"});
+};
+
+let cancelButton = document.querySelector('button#ewok-task-cancel-button');
+cancelButton.onclick = (element) => {
     chrome.runtime.sendMessage({status : "cancel-task"});
+};
+
+let releaseButton = document.querySelector('div .ewok-release-buttons').querySelector('button');
+releaseButton.onclick = (element) => {
+    let radioButton = document.getElementById('ewok-release-release');
+    // if the user decides to release the task, cancel it
+    if (radioButton.checked) {  
+        chrome.runtime.sendMessage({status : "cancel-task"});
+    }  
 };
 
 chrome.runtime.sendMessage({status : "new-task", time : checkTaskTime(), id : getTaskID()});
