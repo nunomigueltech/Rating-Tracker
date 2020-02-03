@@ -102,6 +102,12 @@ function fadeoutSavedLabel() {
     let savedLabel = document.getElementById('save-confirmation');
     savedLabel.style.opacity = '0';
 }
+
+let taskWebsiteButton = document.getElementById('taskWebsite');
+taskWebsiteButton.onclick = (element) => {
+    let taskWebsiteURL = document.getElementById('taskWebsiteURL');
+    taskWebsiteURL.disabled = !taskWebsiteButton.checked;
+};
 // END OF UI HANDLING
 
 // START OF INTERNAL HANDLING
@@ -109,7 +115,8 @@ function loadSettings() {
     chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
                              'refreshSoundVolumeSetting', 'timeoutSoundSetting',
                              'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
-                             'weeklyHourDisplaySetting', 'refreshTimerSetting'], function(data) { 
+                             'weeklyHourDisplaySetting', 'refreshTimerSetting',
+                            'taskWebsiteSetting', 'taskWebsiteURLSetting'], function(data) { 
 
         let minTime = data['minTime'];
         let maxTime = data['maxTime'];
@@ -121,6 +128,8 @@ function loadSettings() {
         let timeoutSoundVolume = data['timeoutSoundVolumeSetting'];
         let dailyHourDisplayEnabled = data['dailyHourDisplaySetting'];
         let weeklyHourDisplayEnabled = data['weeklyHourDisplaySetting'];
+        let taskWebsiteEnabled = data['taskWebsiteSetting'];
+        let taskWebsiteURL = data['taskWebsiteURLSetting'];
 
         if (typeof minTime === 'undefined') {
             minTime = 30;
@@ -173,6 +182,16 @@ function loadSettings() {
             chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplayEnabled});
         }
 
+        if (typeof taskWebsiteEnabled === 'undefined') {
+            taskWebsiteEnabled = false;
+            chrome.storage.sync.set({'taskWebsiteSetting' : taskWebsiteEnabled});
+        }
+
+        if (typeof taskWebsiteURL === 'undefined') {
+            taskWebsiteURL = '';
+            chrome.storage.sync.set({'taskWebsiteURLSetting' : taskWebsiteURL});
+        }
+
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
         document.getElementById('refreshEnabled').checked = refreshEnabled;
@@ -184,6 +203,9 @@ function loadSettings() {
         document.getElementById('soundLevelTaskTimeout').value = timeoutSoundVolume;
         document.getElementById('displayHoursDay').checked = dailyHourDisplayEnabled;
         document.getElementById('displayHoursWeek').checked = weeklyHourDisplayEnabled;
+        document.getElementById('taskWebsite').checked = taskWebsiteEnabled;
+        document.getElementById('taskWebsiteURL').value = taskWebsiteURL;
+        document.getElementById('taskWebsiteURL').disabled = !taskWebsiteEnabled;
         updateRefreshFields(!refreshEnabled);
     });
 }
@@ -200,6 +222,8 @@ saveButton.onclick = function(element) {
     let timeoutSoundVolumeSetting = parseInt(document.getElementById('soundLevelTaskTimeout').value);
     let dailyHourDisplaySetting = document.getElementById('displayHoursDay').checked;
     let weeklyHourDisplaySetting = document.getElementById('displayHoursWeek').checked;
+    let taskWebsiteSetting = document.getElementById('taskWebsite').checked;
+    let taskWebsiteURLSetting = document.getElementById('taskWebsiteURL').value;
 
     if (minTime < 1) {
         minTime = 1;
@@ -226,6 +250,8 @@ saveButton.onclick = function(element) {
     chrome.storage.sync.set({'timeoutSoundVolumeSetting' : timeoutSoundVolumeSetting});
     chrome.storage.sync.set({'dailyHourDisplaySetting' : dailyHourDisplaySetting});
     chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplaySetting});
+    chrome.storage.sync.set({'taskWebsiteSetting' : taskWebsiteSetting});
+    chrome.storage.sync.set({'taskWebsiteURLSetting' : taskWebsiteURLSetting});
 
     // update save notification
     let savedLabel = document.getElementById('save-confirmation');

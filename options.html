@@ -98,7 +98,7 @@
         #resetStorage {
             display: table;
             margin: 0 auto;
-            margin-top: 275px;
+            margin-top: 260px;
         }
 
         #weeklyView {
@@ -168,6 +168,14 @@
                             <input type="checkbox" id="displayHoursDay" checked> Show the hours you have worked for the <b>day</b>
                             <br>
                             <input type="checkbox" id="displayHoursWeek" checked> Show the hours you have worked for the <b>week</b>
+                            <br><br>
+                            <input type="checkbox" id="taskWebsite"> Enable task website button
+                            <table> 
+                                <tr>
+                                    <td>Task Website URL:</td>
+                                    <td><input id="taskWebsiteURL" type="url" disabled></input></td>
+                                </tr>
+                            </table>
                         </div>
                         <div class="column">
                             <b>Sound Settings</b> 
@@ -182,7 +190,7 @@
                         </div>
                         <div class="column">
                             <button id="saveSettings" type="button">Save Settings</button>
-                            <div id="save-confirmation"><b>Saved!</b></div>
+                            <div id="save-confirmation"><h3>Saved!</h3></div>
                             <button id="resetStorage" type="button">Clear Storage</button>
                         </div>
                     </div>

@@ -175,7 +175,10 @@ chrome.runtime.onMessage.addListener(
         let minutesWorkedToday = (typeof storage[dateKey] === 'undefined')? 0.0 : storage[dateKey];
         let displayDailyHoursEnabled = (typeof storage['dailyHourDisplaySetting'] === 'undefined')? true : storage['dailyHourDisplaySetting'];
         let displayWeeklyHoursEnabled = (typeof storage['weeklyHourDisplaySetting'] === 'undefined')? true : storage['weeklyHourDisplaySetting'];
-        sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled]});
+        let taskWebsiteButtonEnabled = (typeof storage['taskWebsiteSetting'] === 'undefined')? false : storage['taskWebsiteSetting'];
+        let taskWebsiteURL = (typeof storage['taskWebsiteURLSetting'] === 'undefined')? '' : storage['taskWebsiteURLSetting'];
+        sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled],
+                      taskWebsite: [taskWebsiteButtonEnabled, taskWebsiteURL]});
         break;
 
       case 'refresh-timer':
@@ -213,7 +216,7 @@ function initializeStorage() {
                            'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
                            'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
                            'weeklyHourDisplaySetting', 'refreshTimerSetting', 
-                           dateKey], (items) => {
+                           'taskWebsiteSetting', 'taskWebsiteURLSetting', dateKey], (items) => {
     if (items == null) {
       console.log("Failed to load information from Google Chrome storage.");
     } else {

@@ -3,6 +3,12 @@ settingsButton.onclick = function(element) {
     chrome.runtime.openOptionsPage();
 };
 
+let taskWebsiteURL = '';
+let taskWebsiteButton = document.getElementById('openTaskWebsite');
+taskWebsiteButton.onclick = function(element) {
+    chrome.tabs.create({url: taskWebsiteURL})
+};
+
 // request data and settings from background script to initialize fields
 chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     let minutesWorkedToday = parseFloat(response.hours[0]);
@@ -11,6 +17,8 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     let hoursWorkedWeek = minutesWorkedWeek / 60.0;
     let displayDailyHoursEnabled = response.data[0];
     let displayWeeklyHoursEnabled = response.data[1];
+    let taskWebsiteButtonEnabled = response.taskWebsite[0];
+    taskWebsiteURL = response.taskWebsite[1];
 
     let hoursWorkedTodayLabel = document.getElementById('hoursWorkedToday');
     if (displayDailyHoursEnabled) {
@@ -24,5 +32,10 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
         hoursWorkedWeekLabel.innerHTML = (hoursWorkedWeek.toFixed(2) * 1.0) + ' / 20.0 hours this week';
     } else {
         hoursWorkedWeekLabel.style.display = 'none';
+    }
+
+    if (!taskWebsiteButtonEnabled) {
+        let taskWebsiteButton = document.getElementById('taskWebsite');
+        taskWebsiteButton.style.display = 'none';
     }
 });
