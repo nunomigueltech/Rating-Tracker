@@ -1,7 +1,9 @@
+// returns task time in milliseconds, which is the standar
 function checkTaskTime() {
     let element = document.querySelector('span.ewok-estimated-task-weight');
 
     let contentStrings = element.innerText.split(" ");
+    console.log("Found " + contentStrings[0] + " minute task")
     return parseFloat(contentStrings[0]);
 }
 

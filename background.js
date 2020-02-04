@@ -20,8 +20,12 @@ var currentTask = {
     this.active = true;
 
     this.taskID = taskID;
-    this.time = parseFloat(time) * 60000.0;
-    this.timeout = window.setTimeout(func, this.time);
+    this.time = parseFloat(time);
+    this.timeout = window.setTimeout(func, currentTask.getMilliseconds());
+  },
+
+  getMilliseconds() {
+    return this.time * 60000.0;
   },
 
   // calculates the time passed in milliseconds
@@ -78,13 +82,15 @@ function updateHours() {
   if (!currentTask.active) return;
 
   var dateString = getDateKey();
-  chrome.storage.sync.get(dateString, (items) => {
+  chrome.storage.sync.get(dateString, (items) => {5
     let minutes = (typeof items[dateString] === 'undefined')? 0.0 : parseFloat(items[dateString]);
     let minutesPassed = currentTask.timePassed() / 60000;
 
     if (minutesPassed < currentTask.time) {
+      console.log("Logging " + minutesPassed + " minutes (" + minutesPassed + " < " + currentTask.time + ")")
       minutes += minutesPassed;
     } else {
+      console.log("Logging " + currentTask.time + " minutes.")
       minutes += currentTask.time;
     }
 
@@ -95,6 +101,7 @@ function updateHours() {
 
 // play sound when task times out
 function taskTimeout() {
+  console.log("Task timed out at " + currentTask.time + " minutes")
   if (storage['timeoutSoundSetting']) {
     let soundID = Math.ceil(Math.random() * 4);
     let soundName = 'taskcomplete' + soundID + '.wav';
@@ -177,8 +184,13 @@ chrome.runtime.onMessage.addListener(
         let displayWeeklyHoursEnabled = (typeof storage['weeklyHourDisplaySetting'] === 'undefined')? true : storage['weeklyHourDisplaySetting'];
         let taskWebsiteButtonEnabled = (typeof storage['taskWebsiteSetting'] === 'undefined')? false : storage['taskWebsiteSetting'];
         let taskWebsiteURL = (typeof storage['taskWebsiteURLSetting'] === 'undefined')? '' : storage['taskWebsiteURLSetting'];
+        let employeeWebsiteButtonEnabled = (typeof storage['employeeWebsiteSetting'] === 'undefined')? false : storage['employeeWebsiteSetting'];
+        let employeeWebsiteURL = (typeof storage['employeeWebsiteURLSetting'] === 'undefined')? '' : storage['employeeWebsiteURLSetting'];
+        let timesheetWebsiteButtonEnabled = (typeof storage['timesheetWebsiteSetting'] === 'undefined')? false : storage['timesheetWebsiteSetting'];
+        let timesheetWebsiteURL = (typeof storage['timesheetWebsiteURLSetting'] === 'undefined')? '' : storage['timesheetWebsiteURLSetting'];
         sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled],
-                      taskWebsite: [taskWebsiteButtonEnabled, taskWebsiteURL]});
+                      taskWebsite: [taskWebsiteButtonEnabled, taskWebsiteURL], employeeWebsite: [employeeWebsiteButtonEnabled, employeeWebsiteURL],
+                      timesheetWebsite: [timesheetWebsiteButtonEnabled, timesheetWebsiteURL]});
         break;
 
       case 'refresh-timer':
@@ -197,7 +209,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     let todaysDateKey = getDateKey();
     if (key === todaysDateKey) {
       let addedTime = parseFloat(value.newValue) - parseFloat(value.oldValue);
-      minutesWorkedWeek += addedTime;
+      console.log("Adding " + addedTime + " minutes to weekly hours.")
+      minutesWorkedWeek += parseFloat(addedTime); // force correct type, sometimes adds wrong type (???)
     }
 
     if (key === 'refreshTimerSetting') {
@@ -216,7 +229,10 @@ function initializeStorage() {
                            'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
                            'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
                            'weeklyHourDisplaySetting', 'refreshTimerSetting', 
-                           'taskWebsiteSetting', 'taskWebsiteURLSetting', dateKey], (items) => {
+                           'taskWebsiteSetting', 'taskWebsiteURLSetting', 
+                           'employeeWebsiteSetting', 'employeeWebsiteURLSetting',
+                           'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting',
+                           dateKey], (items) => {
     if (items == null) {
       console.log("Failed to load information from Google Chrome storage.");
     } else {

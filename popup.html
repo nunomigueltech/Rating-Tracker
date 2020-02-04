@@ -13,7 +13,7 @@
         margin: 0px;
       }
       #openTaskWebsite {
-        background-color: #4CAF50; 
+        background-color: rgb(64, 192, 68); 
         border: none;
         color: white;
         height: 65px;
@@ -24,22 +24,53 @@
         text-decoration: none;
         display: inline-block;
         font-size: 16px;
+        cursor: pointer;
       }
       #openTaskWebsite:hover {
-        background-color: rgb(96, 236, 100); 
+        background-color: rgb(65, 209, 69); 
+      }
+      #additionalSiteButtons {
+        background-color: rgb(107, 198, 214); 
+        border: none;
+        color: white;
+        height: 35px;
+        width: 200px;
+        padding: 0px;
+        margin: 0px;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        justify-content: center;
+        border-bottom-right-radius: 7px;
+        border-bottom-left-radius: 7px;
+      }
+      #openEmployeeWebsite, #openTimesheetWebsite {
+        width: 25px;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      #openEmployeeWebsite:hover, #openTimesheetWebsite:hover {
+        width: 27px;
       }
     </style>
   </head>
   <body>
     <div id="content">
       
-      <div id="taskWebsite">
-        <button id="openTaskWebsite" type="button">Go to Task Website</button>
-        <br><br>
+      
+      <div id="taskWebsiteButton"><button id="openTaskWebsite" type="button">Go to Task Website</button>
       </div>  
+      <div id="additionalSiteButtons">
+        <input type="image" src="images/house.png" id="openEmployeeWebsite"/>
+        <input type="image" src="images/calendar.png" id="openTimesheetWebsite"/>
+      </div>
+      <div id="buttonDivider"><br></div>
       <h3 id ="hoursWorkedToday">0.0 / 8.0 hours today</h3>
       <h4 id ="hoursWorkedWeek">0.0 / 20.0 hours this week</h4>
       <br>
+
       <button id="openSettings" type="button">Open Settings</button>
     </div>
     

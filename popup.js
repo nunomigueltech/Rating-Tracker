@@ -9,6 +9,19 @@ taskWebsiteButton.onclick = function(element) {
     chrome.tabs.create({url: taskWebsiteURL})
 };
 
+let employeeWebsiteURL = '';
+let employeeWebsiteButton = document.getElementById('openEmployeeWebsite');
+employeeWebsiteButton.onclick = function(element) {
+    chrome.tabs.create({url: employeeWebsiteURL})
+};
+
+let timesheetWebsiteURL = '';
+let timesheetWebsiteButton = document.getElementById('openTimesheetWebsite');
+timesheetWebsiteButton.onclick = function(element) {
+    chrome.tabs.create({url: timesheetWebsiteURL})
+};
+
+
 // request data and settings from background script to initialize fields
 chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     let minutesWorkedToday = parseFloat(response.hours[0]);
@@ -19,6 +32,10 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     let displayWeeklyHoursEnabled = response.data[1];
     let taskWebsiteButtonEnabled = response.taskWebsite[0];
     taskWebsiteURL = response.taskWebsite[1];
+    let employeeWebsiteButtonEnabled = response.employeeWebsite[0];
+    employeeWebsiteURL = response.employeeWebsite[1];
+    let timesheetWebsiteButtonEnabled = response.timesheetWebsite[0];
+    timesheetWebsiteURL = response.timesheetWebsite[1];
 
     let hoursWorkedTodayLabel = document.getElementById('hoursWorkedToday');
     if (displayDailyHoursEnabled) {
@@ -35,7 +52,26 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     }
 
     if (!taskWebsiteButtonEnabled) {
-        let taskWebsiteButton = document.getElementById('taskWebsite');
+        let taskWebsiteButton = document.getElementById('taskWebsiteButton');
         taskWebsiteButton.style.display = 'none';
+    }
+
+    if (!employeeWebsiteButtonEnabled) {
+        let openEmployeeWebsite = document.getElementById('openEmployeeWebsite');
+        openEmployeeWebsite.style.display = 'none';
+    }
+    if (!timesheetWebsiteButtonEnabled) {
+        let openTimesheetWebsite = document.getElementById('openTimesheetWebsite');
+        openTimesheetWebsite.style.display = 'none';
+    }
+
+    if (!employeeWebsiteButtonEnabled && !timesheetWebsiteButtonEnabled) {
+        let additionalSiteButtons = document.getElementById('additionalSiteButtons');
+        additionalSiteButtons.style.display = 'none';
+
+        if (!taskWebsiteButtonEnabled) {
+            let buttonDivider = document.getElementById('buttonDivider');
+            buttonDivider.style.display = 'none';
+        }
     }
 });

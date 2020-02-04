@@ -127,6 +127,11 @@
             align-items: center;
             justify-content: center;
         }
+
+        #buttonSettings {
+            position: relative;
+            left: -3px;
+        }
     </style>
   </head>
   <body>
@@ -161,23 +166,6 @@
                             <input type="checkbox" id="displayRefreshTimer" checked> Enable the refresh timer displayed on the extension icon
                             <br>
                             <br>
-                            <b>Pop-up Settings</b> 
-                            <br>
-                            These settings affect the pop-up that appears when you click this extension's icon.
-                            <br>
-                            <input type="checkbox" id="displayHoursDay" checked> Show the hours you have worked for the <b>day</b>
-                            <br>
-                            <input type="checkbox" id="displayHoursWeek" checked> Show the hours you have worked for the <b>week</b>
-                            <br><br>
-                            <input type="checkbox" id="taskWebsite"> Enable task website button
-                            <table> 
-                                <tr>
-                                    <td>Task Website URL:</td>
-                                    <td><input id="taskWebsiteURL" type="url" disabled></input></td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="column">
                             <b>Sound Settings</b> 
                             <br>
                             <input type="checkbox" id="soundTaskFound" checked> Play a sound when tasks are available after a refresh
@@ -187,6 +175,45 @@
                             <input type="checkbox" id="soundTaskTimeout" checked> Play a sound when the task reaches the AET
                             <br>
                             <input type="range" min="1" max="100" value="100" class="slider" id="soundLevelTaskTimeout">
+                        </div>
+                        <div class="column">
+                            <b>Pop-up Settings</b> 
+                            <br>
+                            These settings affect the pop-up that appears when you click this extension's icon.
+                            <br>
+                            <input type="checkbox" id="displayHoursDay" checked> Show the hours you have worked for the <b>day</b>
+                            <br>
+                            <input type="checkbox" id="displayHoursWeek" checked> Show the hours you have worked for the <b>week</b>
+                            <br><br><br>
+                            <table id="buttonSettings"> 
+                                <tr>
+                                    <td colspan="2">
+                                        <input type="checkbox" id="taskWebsite"> Enable task website button
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Task Website URL:</td>
+                                    <td><input id="taskWebsiteURL" type="url" disabled></input></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <input type="checkbox" id="employeeWebsite"> Enable employee website button
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Employee Website URL:</td>
+                                    <td><input id="employeeWebsiteURL" type="url" disabled></input></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <input type="checkbox" id="timesheetWebsite"> Enable timesheet website button
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Timesheet Website URL:</td>
+                                    <td><input id="timesheetWebsiteURL" type="url" disabled></input></td>
+                                </tr>
+                            </table>
                         </div>
                         <div class="column">
                             <button id="saveSettings" type="button">Save Settings</button>
@@ -245,7 +272,7 @@
                         and work hours are backed-up across your devices.
                     </p>
                     <h4>Written by Nuno Rodrigues</h4>
-                    Navigation icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>       
+                    Navigation icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a>, <a href="https://www.flaticon.com/authors/kiranshastry" title="Kiranshastry">Kiranshastry</a>, and <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>       
                 </div>
             </div>
         </div>     

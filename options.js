@@ -108,89 +108,57 @@ taskWebsiteButton.onclick = (element) => {
     let taskWebsiteURL = document.getElementById('taskWebsiteURL');
     taskWebsiteURL.disabled = !taskWebsiteButton.checked;
 };
+
+let employeeWebsiteButton = document.getElementById('employeeWebsite');
+employeeWebsiteButton.onclick = (element) => {
+    let employeeWebsiteURL = document.getElementById('employeeWebsiteURL');
+    employeeWebsiteURL.disabled = !employeeWebsiteButton.checked;
+};
+
+let timesheetWebsiteButton = document.getElementById('timesheetWebsite');
+timesheetWebsiteButton.onclick = (element) => {
+    let timesheetWebsiteURL = document.getElementById('timesheetWebsiteURL');
+    timesheetWebsiteURL.disabled = !timesheetWebsiteButton.checked;
+};
 // END OF UI HANDLING
 
 // START OF INTERNAL HANDLING
+function getValue(data, key, defaultValue) {
+    let result = data[key]
+    if (typeof result === 'undefined') {
+        result = defaultValue;
+        chrome.storage.sync.set({[key] : result});
+    }
+
+    return result;
+}
+
 function loadSettings() {
     chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
                              'refreshSoundVolumeSetting', 'timeoutSoundSetting',
                              'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
                              'weeklyHourDisplaySetting', 'refreshTimerSetting',
-                            'taskWebsiteSetting', 'taskWebsiteURLSetting'], function(data) { 
+                             'taskWebsiteSetting', 'taskWebsiteURLSetting',
+                             'employeeWebsiteSetting', 'employeeWebsiteURLSetting',
+                            'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting']
+                             , function(data) { 
 
-        let minTime = data['minTime'];
-        let maxTime = data['maxTime'];
-        let refreshEnabled = data['refreshSetting'];
-        let refreshSoundEnabled = data['refreshSoundSetting'];
-        let refreshSoundVolume = data['refreshSoundVolumeSetting'];
-        let refreshTimerEnabled = data['refreshTimerSetting'];
-        let timeoutSoundEnabled = data['timeoutSoundSetting'];
-        let timeoutSoundVolume = data['timeoutSoundVolumeSetting'];
-        let dailyHourDisplayEnabled = data['dailyHourDisplaySetting'];
-        let weeklyHourDisplayEnabled = data['weeklyHourDisplaySetting'];
-        let taskWebsiteEnabled = data['taskWebsiteSetting'];
-        let taskWebsiteURL = data['taskWebsiteURLSetting'];
-
-        if (typeof minTime === 'undefined') {
-            minTime = 30;
-            chrome.storage.sync.set({'minTime' : minTime});
-        }
-        
-        if (typeof maxTime === 'undefined') {
-            maxTime = 60;
-            chrome.storage.sync.set({'maxTime' : maxTime});
-        }
-
-        if (typeof refreshEnabled === 'undefined') {
-            refreshEnabled = true;
-            chrome.storage.sync.set({'refreshSetting' : refreshEnabled});
-        }
-
-        if (typeof refreshSoundEnabled === 'undefined') {
-            refreshSoundEnabled = true;
-            chrome.storage.sync.set({'refreshSoundSetting' : refreshSoundEnabled});
-        }
-
-        if (typeof refreshSoundVolume === 'undefined') {
-            refreshSoundVolume = 100;
-            chrome.storage.sync.set({'refreshSoundVolumeSetting' : refreshSoundVolume});
-        }
-
-        if (typeof refreshTimerEnabled === 'undefined') {
-            refreshTimerEnabled = true;
-            chrome.storage.sync.set({'refreshTimerSetting' : refreshTimerEnabled});
-        }
-
-
-        if (typeof timeoutSoundEnabled === 'undefined') {
-            timeoutSoundEnabled = true;
-            chrome.storage.sync.set({'timeoutSoundSetting' : timeoutSoundEnabled});
-        }
-
-        if (typeof timeoutSoundVolume === 'undefined') {
-            timeoutSoundVolume = 100;
-            chrome.storage.sync.set({'timeoutSoundVolumeSetting' : timeoutSoundVolume});
-        }
-
-        if (typeof dailyHourDisplayEnabled === 'undefined') {
-            dailyHourDisplayEnabled = true;
-            chrome.storage.sync.set({'dailyHourDisplaySetting' : dailyHourDisplayEnabled});
-        }
-
-        if (typeof weeklyHourDisplayEnabled === 'undefined') {
-            weeklyHourDisplayEnabled = true;
-            chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplayEnabled});
-        }
-
-        if (typeof taskWebsiteEnabled === 'undefined') {
-            taskWebsiteEnabled = false;
-            chrome.storage.sync.set({'taskWebsiteSetting' : taskWebsiteEnabled});
-        }
-
-        if (typeof taskWebsiteURL === 'undefined') {
-            taskWebsiteURL = '';
-            chrome.storage.sync.set({'taskWebsiteURLSetting' : taskWebsiteURL});
-        }
+        let minTime = getValue(data, 'minTime', 30);
+        let maxTime = getValue(data, 'maxTime', 60);
+        let refreshEnabled = getValue(data, 'refreshSetting', true);
+        let refreshSoundEnabled = getValue(data, 'refreshSoundSetting', true);
+        let refreshSoundVolume = getValue(data, 'refreshSoundVolumeSetting', 100);
+        let refreshTimerEnabled = getValue(data, 'refreshTimerSetting', true);
+        let timeoutSoundEnabled = getValue(data, 'timeoutSoundSetting', true);
+        let timeoutSoundVolume = getValue(data, 'timeoutSoundVolumeSetting', 100);
+        let dailyHourDisplayEnabled = getValue(data, 'dailyHourDisplaySetting', true);
+        let weeklyHourDisplayEnabled = getValue(data, 'weeklyHourDisplaySetting', true);
+        let taskWebsiteEnabled = getValue(data, 'taskWebsiteSetting', false);
+        let taskWebsiteURL = getValue(data, 'taskWebsiteURLSetting', '');
+        let employeeWebsiteEnabled = getValue(data, 'employeeWebsiteSetting', false);
+        let employeeWebsiteURL = getValue(data, 'employeeWebsiteURLSetting', '');
+        let timesheetWebsiteEnabled = getValue(data, 'timesheetWebsiteSetting', false);
+        let timesheetWebsiteURL = getValue(data, 'timesheetWebsiteURLSetting', '');
 
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
@@ -206,6 +174,12 @@ function loadSettings() {
         document.getElementById('taskWebsite').checked = taskWebsiteEnabled;
         document.getElementById('taskWebsiteURL').value = taskWebsiteURL;
         document.getElementById('taskWebsiteURL').disabled = !taskWebsiteEnabled;
+        document.getElementById('employeeWebsite').checked = employeeWebsiteEnabled;
+        document.getElementById('employeeWebsiteURL').value = employeeWebsiteURL;
+        document.getElementById('employeeWebsiteURL').disabled = !employeeWebsiteEnabled;
+        document.getElementById('timesheetWebsite').checked = timesheetWebsiteEnabled;
+        document.getElementById('timesheetWebsiteURL').value = timesheetWebsiteURL;
+        document.getElementById('timesheetWebsiteURL').disabled = !timesheetWebsiteEnabled;
         updateRefreshFields(!refreshEnabled);
     });
 }
@@ -224,6 +198,10 @@ saveButton.onclick = function(element) {
     let weeklyHourDisplaySetting = document.getElementById('displayHoursWeek').checked;
     let taskWebsiteSetting = document.getElementById('taskWebsite').checked;
     let taskWebsiteURLSetting = document.getElementById('taskWebsiteURL').value;
+    let employeeWebsiteSetting = document.getElementById('employeeWebsite').checked;
+    let employeeWebsiteURLSetting = document.getElementById('employeeWebsiteURL').value;
+    let timesheetWebsiteSetting = document.getElementById('timesheetWebsite').checked;
+    let timesheetWebsiteURLSetting = document.getElementById('timesheetWebsiteURL').value;
 
     if (minTime < 1) {
         minTime = 1;
@@ -252,6 +230,10 @@ saveButton.onclick = function(element) {
     chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplaySetting});
     chrome.storage.sync.set({'taskWebsiteSetting' : taskWebsiteSetting});
     chrome.storage.sync.set({'taskWebsiteURLSetting' : taskWebsiteURLSetting});
+    chrome.storage.sync.set({'employeeWebsiteSetting' : employeeWebsiteSetting});
+    chrome.storage.sync.set({'employeeWebsiteURLSetting' : employeeWebsiteURLSetting});
+    chrome.storage.sync.set({'timesheetWebsiteSetting' : timesheetWebsiteSetting});
+    chrome.storage.sync.set({'timesheetWebsiteURLSetting' : timesheetWebsiteURLSetting});
 
     // update save notification
     let savedLabel = document.getElementById('save-confirmation');
