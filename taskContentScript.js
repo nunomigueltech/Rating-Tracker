@@ -1,4 +1,3 @@
-// returns task time in milliseconds, which is the standar
 function checkTaskTime() {
     let element = document.querySelector('span.ewok-estimated-task-weight');
 
