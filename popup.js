@@ -23,6 +23,9 @@ timesheetWebsiteButton.onclick = function(element) {
 
 function getTextColor(percent) {
     let hslValue = 120 * percent;
+    if (hslValue > 1.0) {
+        hslValue = 1.0;
+    }
     return 'hsl(' + hslValue + ', 100%, 40%)';
 }
 

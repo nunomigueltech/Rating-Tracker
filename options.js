@@ -44,6 +44,7 @@ resetButton.onclick = (element) => {
     if (confirm("Are you sure that want to clear ALL extension storage? This includes your settings and your recorded hours.")) {
         chrome.storage.sync.clear();
         window.location.reload();
+        chrome.runtime.sendMessage({status : 'reset-storage'});
     }
 };
 

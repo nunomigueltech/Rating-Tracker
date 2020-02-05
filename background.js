@@ -70,7 +70,9 @@ function calculateWeekHours() {
   chrome.storage.sync.get(dateKeys, (items) => {
     let values = Object.values(items)
     for (let i = 0; i < values.length; i++) {
-      totalMinutes += parseFloat(values[i]);
+      if (values[i] !== 'undefined') {
+        totalMinutes += parseFloat(values[i]);
+      } 
     }
 
     minutesWorkedWeek = totalMinutes;
@@ -83,7 +85,7 @@ function updateHours() {
 
   var dateString = getDateKey();
   chrome.storage.sync.get(dateString, (items) => {5
-    let minutes = (typeof items[dateString] === 'undefined')? 0.0 : parseFloat(items[dateString]);
+    let minutes = storage[dateString];
     let minutesPassed = currentTask.timePassed() / 60000;
 
     if (minutesPassed < currentTask.time) {
@@ -179,21 +181,12 @@ chrome.runtime.onMessage.addListener(
       
       case 'popup-data':
         var dateKey = getDateKey();
-        let minutesWorkedToday = (typeof storage[dateKey] === 'undefined')? 0.0 : storage[dateKey];
-        let displayDailyHoursEnabled = (typeof storage['dailyHourDisplaySetting'] === 'undefined')? true : storage['dailyHourDisplaySetting'];
-        let displayWeeklyHoursEnabled = (typeof storage['weeklyHourDisplaySetting'] === 'undefined')? true : storage['weeklyHourDisplaySetting'];
-        let taskWebsiteButtonEnabled = (typeof storage['taskWebsiteSetting'] === 'undefined')? false : storage['taskWebsiteSetting'];
-        let taskWebsiteURL = (typeof storage['taskWebsiteURLSetting'] === 'undefined')? '' : storage['taskWebsiteURLSetting'];
-        let employeeWebsiteButtonEnabled = (typeof storage['employeeWebsiteSetting'] === 'undefined')? false : storage['employeeWebsiteSetting'];
-        let employeeWebsiteURL = (typeof storage['employeeWebsiteURLSetting'] === 'undefined')? '' : storage['employeeWebsiteURLSetting'];
-        let timesheetWebsiteButtonEnabled = (typeof storage['timesheetWebsiteSetting'] === 'undefined')? false : storage['timesheetWebsiteSetting'];
-        let timesheetWebsiteURL = (typeof storage['timesheetWebsiteURLSetting'] === 'undefined')? '' : storage['timesheetWebsiteURLSetting'];
-        let dynamicGoalsEnabled = (typeof storage['dynamicGoalsEnabled'] === 'undefined')? false : storage['dynamicGoalsEnabled'];
-        let dailyHourGoal = (typeof storage['dailyHourGoal'] === 'undefined')? 8.0 : storage['dailyHourGoal'];
-        let weeklyHourGoal = (typeof storage['weeklyHourGoal'] === 'undefined')? 20.0 : storage['weeklyHourGoal'];
-        sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled, dynamicGoalsEnabled],
-                      taskWebsite: [taskWebsiteButtonEnabled, taskWebsiteURL], employeeWebsite: [employeeWebsiteButtonEnabled, employeeWebsiteURL],
-                      timesheetWebsite: [timesheetWebsiteButtonEnabled, timesheetWebsiteURL], goals: [dailyHourGoal, weeklyHourGoal]});
+        sendResponse({hours: [storage[dateKey], minutesWorkedWeek],
+                      data: [storage['dailyHourDisplaySetting'], storage['weeklyHourDisplaySetting'], storage['dynamicGoalsEnabled']], 
+                      taskWebsite: [storage['taskWebsiteSetting'], storage['taskWebsiteURLSetting']], 
+                      employeeWebsite: [storage['employeeWebsiteSetting'], storage['employeeWebsiteURLSetting']],
+                      timesheetWebsite: [storage['timesheetWebsiteSetting'], storage['timesheetWebsiteURLSetting']], 
+                      goals: [storage['dailyHourGoal'], storage['weeklyHourGoal']]});
         break;
 
       case 'refresh-timer':
@@ -202,16 +195,34 @@ chrome.runtime.onMessage.addListener(
         resetRefreshTimer();
         globalRefreshInterval = setInterval(updateRefreshTimer, 1000);
         break;
+
+      case 'reset-storage':
+        initializeStorage();
+        calculateWeekHours();
+        break;
     }
   }
 );
+
+// handle undefined values from object literal by using default values
+function getValue(data, key, defaultValue) {
+  let result = data[key]
+  if (typeof result === 'undefined') {
+      result = defaultValue;
+      chrome.storage.sync.set({[key] : result});
+  }
+
+  return result;
+}
 
 // Store new setting changes
 chrome.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, value] of Object.entries(changes)) {
     let todaysDateKey = getDateKey();
     if (key === todaysDateKey) {
-      let addedTime = parseFloat(value.newValue) - parseFloat(value.oldValue);
+      let oldValue = getValue(value, 'oldValue', 0);
+      let newValue = getValue(value, 'newValue', 0);
+      let addedTime = newValue - oldValue;
       console.log("Adding " + addedTime + " minutes to weekly hours.")
       minutesWorkedWeek += parseFloat(addedTime); // force correct type, sometimes adds wrong type (???)
     }
@@ -222,7 +233,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       }
     }
 
-    storage[key] = value.newValue;
+    storage[key] = getValue(value, 'newValue', value['oldValue']); // keep old value if new one is undefined
   }
 });
 
@@ -236,11 +247,30 @@ function initializeStorage() {
                            'employeeWebsiteSetting', 'employeeWebsiteURLSetting',
                            'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting',
                            'dynamicGoalsEnabled', 'dailyHourGoal', 'weeklyHourGoal',
-                           dateKey], (items) => {
-    if (items == null) {
-      console.log("Failed to load information from Google Chrome storage.");
+                           dateKey], (data) => {
+    if (data == null) {
+      console.error("Failed to load information from Google Chrome storage.");
     } else {
-      storage = items;
+      storage['minTime'] = getValue(data, 'minTime', 30);
+      storage['maxTime'] = getValue(data, 'maxTime', 60);
+      storage['refreshSetting'] = getValue(data, 'refreshSetting', true);
+      storage['refreshSoundSetting'] = getValue(data, 'refreshSoundSetting', true);
+      storage['refreshSoundVolumeSetting'] = getValue(data, 'refreshSoundVolumeSetting', 100);
+      storage['timeoutSoundSetting'] = getValue(data, 'timeoutSoundSetting', true);
+      storage['timeoutSoundVolumeSetting'] = getValue(data, 'timeoutSoundVolumeSetting', 100);
+      storage['dailyHourDisplaySetting'] = getValue(data, 'dailyHourDisplaySetting', true);
+      storage['weeklyHourDisplaySetting'] = getValue(data, 'weeklyHourDisplaySetting', true);
+      storage['refreshTimerSetting'] = getValue(data, 'refreshTimerSetting', true);
+      storage['taskWebsiteSetting'] = getValue(data, 'taskWebsiteSetting', false);
+      storage['taskWebsiteURLSetting'] = getValue(data, 'taskWebsiteURLSetting', '');
+      storage['employeeWebsiteSetting'] = getValue(data, 'employeeWebsiteSetting', false);
+      storage['employeeWebsiteURLSetting'] = getValue(data, 'employeeWebsiteURLSetting', '');
+      storage['timesheetWebsiteSetting'] = getValue(data, 'timesheetWebsiteSetting', false);
+      storage['timesheetWebsiteURLSetting'] = getValue(data, 'timesheetWebsiteURLSetting', '');
+      storage['dynamicGoalsEnabled'] = getValue(data, 'dynamicGoalsEnabled', false);
+      storage['dailyHourGoal'] = getValue(data, 'dailyHourGoal', 8.0);
+      storage['weeklyHourGoal'] = getValue(data, 'weeklyHourGoal', 20.0);
+      storage[dateKey] = getValue(data, dateKey, 0.0);
     }
   });
 }
