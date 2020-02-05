@@ -126,8 +126,7 @@ function updateRefreshTimer() {
   if (globalRefreshTime < 0) {
     resetRefreshTimer();
   } else {
-    chrome.browserAction.setBadgeText({text: globalRefreshTime + ''});
-    globalRefreshTime--;
+    chrome.browserAction.setBadgeText({text: globalRefreshTime-- + ''});
   }
 }
 
