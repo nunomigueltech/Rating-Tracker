@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Rating Tracker</title>
     <style>
         #title {
             margin: 0 auto;
@@ -83,9 +84,12 @@
             width: 300px;
         }
 
-        #saveSettings {
-            display: table;
-            margin: 0 auto;
+        #saveSettings, #resetStorage {
+            padding: 0px;
+            margin-left: 5px;
+            margin-right: 5px;
+            height: 20px;
+            width: 100px;
         }
 
         #save-confirmation {
@@ -95,7 +99,7 @@
             text-align: center;
         }
 
-        #resetStorage {
+        #resetSftorage {
             display: table;
             margin: 0 auto;
             margin-top: 260px;
@@ -128,9 +132,21 @@
             justify-content: center;
         }
 
-        #buttonSettings {
+        .settingsTable {
             position: relative;
             left: -3px;
+        }
+
+        #storageButtons {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            justify-content: center;
+            margin-top: 200px;
+        }
+
+        #dailyHourGoal, #weeklyHourGoal {
+            width: 50px;
         }
     </style>
   </head>
@@ -184,8 +200,10 @@
                             <input type="checkbox" id="displayHoursDay" checked> Show the hours you have worked for the <b>day</b>
                             <br>
                             <input type="checkbox" id="displayHoursWeek" checked> Show the hours you have worked for the <b>week</b>
+                            <br>
+                            <input type="checkbox" id="displayColoredGoals"> Enable dynamic goal colors, which change (red-yellow-green) <br>as you progress towards your goals
                             <br><br><br>
-                            <table id="buttonSettings"> 
+                            <table class="settingsTable"> 
                                 <tr>
                                     <td colspan="2">
                                         <input type="checkbox" id="taskWebsite"> Enable task website button
@@ -216,9 +234,23 @@
                             </table>
                         </div>
                         <div class="column">
-                            <button id="saveSettings" type="button">Save Settings</button>
-                            <div id="save-confirmation"><h3>Saved!</h3></div>
-                            <button id="resetStorage" type="button">Clear Storage</button>
+                            <b>Goal Settings</b> 
+                            <br>
+                            <table class="settingsTable"> 
+                                <tr>
+                                    <td>Daily hour goal:</td>
+                                    <td><input id="dailyHourGoal" type="number" value="8" min="0.0" max="8.0"></input></td>
+                                </tr>
+                                <tr>
+                                    <td>Weekly hour goal:</td>
+                                    <td><input id="weeklyHourGoal" type="number" value="20" min="0.0"></input></td>
+                                </tr>
+                            </table>
+                            <div id="storageButtons">
+                                <button id="saveSettings" type="button">Save Settings</button>
+                                <button id="resetStorage" type="button">Clear Storage</button>
+                            </div>      
+                            <div id="save-confirmation"><h3>Saved!</h3></div>  
                         </div>
                     </div>
                     

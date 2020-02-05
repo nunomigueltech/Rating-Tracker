@@ -21,6 +21,10 @@ timesheetWebsiteButton.onclick = function(element) {
     chrome.tabs.create({url: timesheetWebsiteURL})
 };
 
+function getTextColor(percent) {
+    let hslValue = 120 * percent;
+    return 'hsl(' + hslValue + ', 100%, 40%)';
+}
 
 // request data and settings from background script to initialize fields
 chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
@@ -30,23 +34,34 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     let hoursWorkedWeek = minutesWorkedWeek / 60.0;
     let displayDailyHoursEnabled = response.data[0];
     let displayWeeklyHoursEnabled = response.data[1];
+    let dynamicGoalsEnabled = response.data[2];
     let taskWebsiteButtonEnabled = response.taskWebsite[0];
     taskWebsiteURL = response.taskWebsite[1];
     let employeeWebsiteButtonEnabled = response.employeeWebsite[0];
     employeeWebsiteURL = response.employeeWebsite[1];
     let timesheetWebsiteButtonEnabled = response.timesheetWebsite[0];
     timesheetWebsiteURL = response.timesheetWebsite[1];
-
+    let dailyHourGoal = response.goals[0];
+    let weeklyHourGoal = response.goals[1];
+    
     let hoursWorkedTodayLabel = document.getElementById('hoursWorkedToday');
     if (displayDailyHoursEnabled) {
-        hoursWorkedTodayLabel.innerHTML = (hoursWorkedToday.toFixed(2) * 1.0) + ' / 8.0 hours today';
+        let goalCompletionPercentage = hoursWorkedToday / dailyHourGoal;
+        hoursWorkedTodayLabel.innerHTML = (hoursWorkedToday.toFixed(2) * 1.0) + ' / ' + dailyHourGoal + ' hours today';
+        if (dynamicGoalsEnabled) {
+            hoursWorkedTodayLabel.style.color = getTextColor(goalCompletionPercentage);
+        }
     } else {
         hoursWorkedTodayLabel.style.display = 'none';
     }
 
     let hoursWorkedWeekLabel = document.getElementById('hoursWorkedWeek');
     if (displayWeeklyHoursEnabled) {
-        hoursWorkedWeekLabel.innerHTML = (hoursWorkedWeek.toFixed(2) * 1.0) + ' / 20.0 hours this week';
+        let goalCompletionPercentage = hoursWorkedWeek / weeklyHourGoal;
+        hoursWorkedWeekLabel.innerHTML = (hoursWorkedWeek.toFixed(2) * 1.0) + ' / ' + weeklyHourGoal + ' hours this week';
+        if (dynamicGoalsEnabled) {
+            hoursWorkedWeekLabel.style.color = getTextColor(goalCompletionPercentage);
+        }
     } else {
         hoursWorkedWeekLabel.style.display = 'none';
     }

@@ -188,9 +188,12 @@ chrome.runtime.onMessage.addListener(
         let employeeWebsiteURL = (typeof storage['employeeWebsiteURLSetting'] === 'undefined')? '' : storage['employeeWebsiteURLSetting'];
         let timesheetWebsiteButtonEnabled = (typeof storage['timesheetWebsiteSetting'] === 'undefined')? false : storage['timesheetWebsiteSetting'];
         let timesheetWebsiteURL = (typeof storage['timesheetWebsiteURLSetting'] === 'undefined')? '' : storage['timesheetWebsiteURLSetting'];
-        sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled],
+        let dynamicGoalsEnabled = (typeof storage['dynamicGoalsEnabled'] === 'undefined')? false : storage['dynamicGoalsEnabled'];
+        let dailyHourGoal = (typeof storage['dailyHourGoal'] === 'undefined')? 8.0 : storage['dailyHourGoal'];
+        let weeklyHourGoal = (typeof storage['weeklyHourGoal'] === 'undefined')? 20.0 : storage['weeklyHourGoal'];
+        sendResponse({hours: [minutesWorkedToday, minutesWorkedWeek], data: [displayDailyHoursEnabled, displayWeeklyHoursEnabled, dynamicGoalsEnabled],
                       taskWebsite: [taskWebsiteButtonEnabled, taskWebsiteURL], employeeWebsite: [employeeWebsiteButtonEnabled, employeeWebsiteURL],
-                      timesheetWebsite: [timesheetWebsiteButtonEnabled, timesheetWebsiteURL]});
+                      timesheetWebsite: [timesheetWebsiteButtonEnabled, timesheetWebsiteURL], goals: [dailyHourGoal, weeklyHourGoal]});
         break;
 
       case 'refresh-timer':
@@ -232,6 +235,7 @@ function initializeStorage() {
                            'taskWebsiteSetting', 'taskWebsiteURLSetting', 
                            'employeeWebsiteSetting', 'employeeWebsiteURLSetting',
                            'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting',
+                           'dynamicGoalsEnabled', 'dailyHourGoal', 'weeklyHourGoal',
                            dateKey], (items) => {
     if (items == null) {
       console.log("Failed to load information from Google Chrome storage.");
