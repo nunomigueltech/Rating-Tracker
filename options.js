@@ -121,6 +121,12 @@ timesheetWebsiteButton.onclick = (element) => {
     let timesheetWebsiteURL = document.getElementById('timesheetWebsiteURL');
     timesheetWebsiteURL.disabled = !timesheetWebsiteButton.checked;
 };
+
+let beforeGoalNotificationsCheckbox = document.getElementById('beforeGoalNotificationsEnabled');
+beforeGoalNotificationsCheckbox.onclick = (element) => {
+    let goalMinutesText = document.getElementById('notificationMinutes');
+    goalMinutesText.disabled = !beforeGoalNotificationsCheckbox.checked;
+};
 // END OF UI HANDLING
 
 // START OF INTERNAL HANDLING
