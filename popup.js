@@ -22,10 +22,11 @@ timesheetWebsiteButton.onclick = function(element) {
 };
 
 function getTextColor(percent) {
-    let hslValue = 120 * percent;
-    if (hslValue > 1.0) {
-        hslValue = 1.0;
+    if (percent > 1.0) {
+        percent = 1.0;
     }
+    let hslValue = 120 * percent;
+
     return 'hsl(' + hslValue + ', 100%, 40%)';
 }
 
@@ -49,9 +50,9 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     
     let hoursWorkedTodayLabel = document.getElementById('hoursWorkedToday');
     if (displayDailyHoursEnabled) {
-        let goalCompletionPercentage = hoursWorkedToday / dailyHourGoal;
         hoursWorkedTodayLabel.innerHTML = (hoursWorkedToday.toFixed(2) * 1.0) + ' / ' + dailyHourGoal + ' hours today';
         if (dynamicGoalsEnabled) {
+            let goalCompletionPercentage = hoursWorkedToday / dailyHourGoal;
             hoursWorkedTodayLabel.style.color = getTextColor(goalCompletionPercentage);
         }
     } else {
@@ -60,9 +61,9 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
 
     let hoursWorkedWeekLabel = document.getElementById('hoursWorkedWeek');
     if (displayWeeklyHoursEnabled) {
-        let goalCompletionPercentage = hoursWorkedWeek / weeklyHourGoal;
         hoursWorkedWeekLabel.innerHTML = (hoursWorkedWeek.toFixed(2) * 1.0) + ' / ' + weeklyHourGoal + ' hours this week';
         if (dynamicGoalsEnabled) {
+            let goalCompletionPercentage = hoursWorkedWeek / weeklyHourGoal;
             hoursWorkedWeekLabel.style.color = getTextColor(goalCompletionPercentage);
         }
     } else {

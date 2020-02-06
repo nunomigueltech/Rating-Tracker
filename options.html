@@ -142,10 +142,10 @@
             align-items: center;
             font-size: 16px;
             justify-content: center;
-            margin-top: 200px;
+            margin-top: 100px;
         }
 
-        #dailyHourGoal, #weeklyHourGoal {
+        .numberFields {
             width: 50px;
         }
     </style>
@@ -239,11 +239,29 @@
                             <table class="settingsTable"> 
                                 <tr>
                                     <td>Daily hour goal:</td>
-                                    <td><input id="dailyHourGoal" type="number" value="8" min="0.0" max="8.0"></input></td>
+                                    <td><input class="numberFields" id="dailyHourGoal" type="number" value="8" min="0.0" max="8.0"></input></td>
                                 </tr>
                                 <tr>
                                     <td>Weekly hour goal:</td>
-                                    <td><input id="weeklyHourGoal" type="number" value="20" min="0.0"></input></td>
+                                    <td><input class="numberFields" id="weeklyHourGoal" type="number" value="20" min="0.0"></input></td>
+                                </tr>
+                                <tr>
+                            </table>
+                            <br>
+                            <b>Notification Settings</b>
+                            <table class="settingsTable">
+                                    <td colspan="2">
+                                        <input type="checkbox" id="goalNotificationsEnabled" checked> Enable Chrome notifications when you reach a goal
+                                    </td> 
+                                </tr>
+                                <tr>
+                                   <td colspan="2">
+                                    <input type="checkbox" id="beforeGoalNotificationsEnabled" checked> Enable Chrome notifications <b>before</b> reaching a goal:
+                                   </td> 
+                                </tr>
+                                <tr>
+                                    <td>Time before goal to notify (minutes):</td>
+                                    <td><input class="numberFields" id="notificationMinutes" type="number" value="15" min="0.0"></input></td>
                                 </tr>
                             </table>
                             <div id="storageButtons">

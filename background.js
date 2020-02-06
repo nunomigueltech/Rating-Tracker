@@ -181,7 +181,7 @@ chrome.runtime.onMessage.addListener(
       case 'popup-data':
         var dateKey = getDateKey();
         sendResponse({hours: [storage[dateKey], minutesWorkedWeek],
-                      data: [storage['dailyHourDisplaySetting'], storage['weeklyHourDisplaySetting'], storage['dynamicGoalsEnabled']], 
+                      data: [storage['dailyHourDisplaySetting'], storage['weeklyHourDisplaySetting'], storage['dynamicGoalsSetting']], 
                       taskWebsite: [storage['taskWebsiteSetting'], storage['taskWebsiteURLSetting']], 
                       employeeWebsite: [storage['employeeWebsiteSetting'], storage['employeeWebsiteURLSetting']],
                       timesheetWebsite: [storage['timesheetWebsiteSetting'], storage['timesheetWebsiteURLSetting']], 
@@ -219,11 +219,43 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, value] of Object.entries(changes)) {
     let todaysDateKey = getDateKey();
     if (key === todaysDateKey) {
-      let oldValue = getValue(value, 'oldValue', 0);
-      let newValue = getValue(value, 'newValue', 0);
-      let addedTime = newValue - oldValue;
+      let oldMinutes = getValue(value, 'oldValue', 0);
+      let newMinutes = getValue(value, 'newValue', 0);
+      let addedTime = newMinutes - oldMinutes;
       console.log("Adding " + addedTime + " minutes to weekly hours.")
-      minutesWorkedWeek += parseFloat(addedTime); // force correct type, sometimes adds wrong type (???)
+      minutesWorkedWeek += addedTime;
+
+      let notificationText = '';
+      let dailyGoalMinutes = storage['dailyHourGoal'] * 60;
+      let weeklyGoalMinutes = storage['weeklyHourGoal'] * 60;
+      let goalNotificationEnabled = storage['goalNotificationsSetting'];
+      let beforeGoalNotificationEnabled = storage['beforeGoalNotificationsSetting'];
+      let notificationMinutes = storage['notificationMinutes'];
+      if (newMinutes < dailyGoalMinutes) {
+        let timeDifference = dailyGoalMinutes - newMinutes;
+        if (beforeGoalNotificationEnabled && (timeDifference <= notificationMinutes)) {
+          notificationText = notificationText + 'You are ' + timeDifference.toFixed(2) + ' minutes away from achieving your daily goal! '; 
+        }
+      } else {
+        if (goalNotificationEnabled) {
+          notificationText = notificationText + 'You have achieved your daily goal of ' + storage['dailyHourGoal'] + ' hours! '; 
+        }
+      }
+
+      if (minutesWorkedWeek < weeklyGoalMinutes) {
+        let timeDifference = weeklyGoalMinutes - minutesWorkedWeek;
+        if (beforeGoalNotificationEnabled && (timeDifference <= notificationMinutes)) {
+          notificationText = notificationText + 'You are ' + timeDifference.toFixed(2) + ' minutes away from achieving your weekly goal!'; 
+        }
+      } else {
+        if (goalNotificationEnabled) {
+          notificationText = notificationText + 'You have achieved your weekly goal of ' + storage['weeklyHourGoal'] + ' hours!'; 
+        }
+      }
+
+      if (goalNotificationEnabled || beforeGoalNotificationEnabled) {
+        chrome.notifications.create({type: 'basic', iconUrl: 'images/icon128.png', title: 'Gooooooooal!!', message: notificationText});
+      }
     }
 
     if (key === 'refreshTimerSetting') {
@@ -245,8 +277,9 @@ function initializeStorage() {
                            'taskWebsiteSetting', 'taskWebsiteURLSetting', 
                            'employeeWebsiteSetting', 'employeeWebsiteURLSetting',
                            'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting',
-                           'dynamicGoalsEnabled', 'dailyHourGoal', 'weeklyHourGoal',
-                           dateKey], (data) => {
+                           'dynamicGoalsSetting', 'dailyHourGoal', 'weeklyHourGoal',
+                           'goalNotificationsSetting', 'beforeGoalNotificationsSetting',
+                           'notificationMinutes', dateKey], (data) => {
     if (data == null) {
       console.error("Failed to load information from Google Chrome storage.");
     } else {
@@ -266,9 +299,12 @@ function initializeStorage() {
       storage['employeeWebsiteURLSetting'] = getValue(data, 'employeeWebsiteURLSetting', '');
       storage['timesheetWebsiteSetting'] = getValue(data, 'timesheetWebsiteSetting', false);
       storage['timesheetWebsiteURLSetting'] = getValue(data, 'timesheetWebsiteURLSetting', '');
-      storage['dynamicGoalsEnabled'] = getValue(data, 'dynamicGoalsEnabled', false);
+      storage['dynamicGoalsSetting'] = getValue(data, 'dynamicGoalsSetting', false);
       storage['dailyHourGoal'] = getValue(data, 'dailyHourGoal', 8.0);
       storage['weeklyHourGoal'] = getValue(data, 'weeklyHourGoal', 20.0);
+      storage['goalNotificationsSetting'] = getValue(data, 'goalNotificationsSetting', true);
+      storage['beforeGoalNotificationsSetting'] = getValue(data, 'beforeGoalNotificationsSetting', true);
+      storage['notificationMinutes'] = getValue(data, 'notificationMinutes', 15.0);
       storage[dateKey] = getValue(data, dateKey, 0.0);
     }
   });
