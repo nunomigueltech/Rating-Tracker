@@ -256,7 +256,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         }
       }
 
-      if (goalNotificationEnabled || beforeGoalNotificationEnabled) {
+      if (notificationText != '') {
         chrome.notifications.create({type: 'basic', iconUrl: 'images/icon128.png', title: 'Gooooooooal!!', message: notificationText});
       }
     }
