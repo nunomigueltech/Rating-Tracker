@@ -126,7 +126,7 @@ function updateHours() {
   if (!currentTask.active) return;
 
   var dateString = getDateKey();
-  chrome.storage.sync.get(dateString, (items) => {5
+  chrome.storage.sync.get(dateString, (items) => {
     let minutes = storage[dateString];
     let minutesPassed = currentTask.timePassed() / 60000;
 

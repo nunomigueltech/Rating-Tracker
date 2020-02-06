@@ -50,7 +50,7 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     
     let hoursWorkedTodayLabel = document.getElementById('hoursWorkedToday');
     if (displayDailyHoursEnabled) {
-        hoursWorkedTodayLabel.innerHTML = (hoursWorkedToday.toFixed(2) * 1.0) + ' / ' + dailyHourGoal + ' hours today';
+        hoursWorkedTodayLabel.innerText = hoursWorkedToday.toFixed(2) + ' / ' + dailyHourGoal + ' hours today';
         if (dynamicGoalsEnabled) {
             let goalCompletionPercentage = hoursWorkedToday / dailyHourGoal;
             hoursWorkedTodayLabel.style.color = getTextColor(goalCompletionPercentage);
@@ -61,7 +61,7 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
 
     let hoursWorkedWeekLabel = document.getElementById('hoursWorkedWeek');
     if (displayWeeklyHoursEnabled) {
-        hoursWorkedWeekLabel.innerHTML = (hoursWorkedWeek.toFixed(2) * 1.0) + ' / ' + weeklyHourGoal + ' hours this week';
+        hoursWorkedWeekLabel.innerHTML = hoursWorkedWeek.toFixed(2) + ' / ' + weeklyHourGoal + ' hours this week';
         if (dynamicGoalsEnabled) {
             let goalCompletionPercentage = hoursWorkedWeek / weeklyHourGoal;
             hoursWorkedWeekLabel.style.color = getTextColor(goalCompletionPercentage);
