@@ -127,6 +127,20 @@ beforeGoalNotificationsCheckbox.onclick = (element) => {
     let goalMinutesText = document.getElementById('notificationMinutes');
     goalMinutesText.disabled = !beforeGoalNotificationsCheckbox.checked;
 };
+
+chrome.runtime.onMessage.addListener( 
+    function(request, sender, sendResponse) {
+        if (request.status == "update-calendar") {
+            let hourEntries = document.getElementById('weeklyView').rows[2].cells;
+            let date = new Date();
+            let currentDay = date.getDay();
+            let hoursDay = (request.timeDay) / 60;
+            let hoursWeek = (request.timeWeek) / 60;
+
+            hourEntries[currentDay].innerHTML = hoursDay.toFixed(2) + ' hours';
+            hourEntries[7].innerHTML = hoursWeek.toFixed(2) + ' hours';
+        }
+    });
 // END OF UI HANDLING
 
 // START OF INTERNAL HANDLING

@@ -225,6 +225,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       console.log("Adding " + addedTime + " minutes to weekly hours.")
       minutesWorkedWeek += addedTime;
 
+      chrome.runtime.sendMessage({status: "update-calendar", timeDay: newMinutes, timeWeek: minutesWorkedWeek});
+
+      // HANDLE NOTIFICATIONS 
       let notificationText = '';
       let dailyGoalMinutes = storage['dailyHourGoal'] * 60;
       let weeklyGoalMinutes = storage['weeklyHourGoal'] * 60;
