@@ -38,9 +38,7 @@ chrome.runtime.sendMessage({status : 'return-refresh-status'}, (response) => {
             
                 let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
                 setTimeout(handleRefresh, waitTime * 1000);
-                if (response.refreshTimerEnabled) {
-                    chrome.runtime.sendMessage({status : 'refresh-timer', time : waitTime});
-                }
+                chrome.runtime.sendMessage({status : 'refresh-timer', time : waitTime});
             }
         });
     }

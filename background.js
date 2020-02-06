@@ -8,6 +8,48 @@ var minutesWorkedWeek = 0.0; // used to provide constant time access to pop-up s
 var globalRefreshTime = 0;
 var globalRefreshInterval = null;
 
+var refreshTimer = {
+  time: 0,
+  startTime: null,
+  interval: null,
+
+  start(time) {
+    this.time = time;
+    let date = new Date();
+    this.startTime = date.getTime();
+    if (storage['refreshTimerSetting']) {
+      this.interval = window.setInterval(refreshTimer.update, 1000);
+    }
+  },
+
+  restart() {
+    if (this.time <= 0) return;
+
+    let date = new Date();
+    let currentTime = date.getTime();
+    let timePassed = currentTime - this.startTime;
+    this.time -= Math.floor(timePassed / 1000);
+    if (this.time > 0) {
+      this.update();
+      this.interval = window.setInterval(refreshTimer.update, 1000);
+    }
+  },
+
+  update() {
+    console.log("Updating refresh timer")
+    if (refreshTimer.time < 0) {
+      refreshTimer.clear();
+    } else {
+      chrome.browserAction.setBadgeText({text: refreshTimer.time-- + ''});
+    }
+  },
+
+  clear() {
+    window.clearInterval(refreshTimer.interval);
+    chrome.browserAction.setBadgeText({text: ''});
+  }
+}
+
 var currentTask = {
   time: 0.0,
   taskID: '',  
@@ -153,7 +195,7 @@ chrome.runtime.onMessage.addListener(
 
       // Supply refresh setting data to refresh content script
       case 'return-time-interval': 
-        sendResponse({value: [storage['refreshSetting'], storage['minTime'], storage['maxTime']], refreshTimerEnabled: storage['refreshTimerSetting']});
+        sendResponse({value: [storage['refreshSetting'], storage['minTime'], storage['maxTime']]});
         break;
 
       case 'return-refresh-status':
@@ -190,9 +232,11 @@ chrome.runtime.onMessage.addListener(
 
       case 'refresh-timer':
         // start icon badge timer when refresh time is received from content script
-        globalRefreshTime = request.time - 1;
-        resetRefreshTimer();
-        globalRefreshInterval = setInterval(updateRefreshTimer, 1000);
+        //globalRefreshTime = request.time - 1;
+        //resetRefreshTimer();
+        //globalRefreshInterval = setInterval(updateRefreshTimer, 1000);
+        refreshTimer.clear();
+        refreshTimer.start(request.time);
         break;
 
       case 'reset-storage':
@@ -263,7 +307,11 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 
     if (key === 'refreshTimerSetting') {
       if (!value.newValue) {
-        resetRefreshTimer();
+        console.log("Trying to clear")
+        refreshTimer.clear();
+        //resetRefreshTimer();
+      } else {
+        refreshTimer.restart();
       }
     }
 
