@@ -21,6 +21,11 @@ timesheetWebsiteButton.onclick = function(element) {
     chrome.tabs.create({url: timesheetWebsiteURL})
 };
 
+/**
+ * Returns string containing CSS color (according to the progress of a particular goal) 
+ * that can be applied to the pop-up text. 
+ * @param {Float that represents the completion of a particular user goal.} percent 
+ */
 function getTextColor(percent) {
     if (percent > 1.0) {
         percent = 1.0;
@@ -28,6 +33,50 @@ function getTextColor(percent) {
     let hslValue = 120 * percent;
 
     return 'hsl(' + hslValue + ', 100%, 40%)';
+}
+
+/**
+ * Updates the color of an HTML element according to the progress of user goals.
+ * @param {String containing the ID of the label containing the string you wish to update.} labelElement 
+ * @param {Float containing the hours worked towards the current goal.} currentProgress 
+ * @param {Float containing the hours configured for the current goal.} goal 
+ */
+function updateTextColor(labelElement, currentProgress, goal) {
+    let goalCompletionPercentage = currentProgress / goal;
+    labelElement.style.color = getTextColor(goalCompletionPercentage);
+}
+
+/**
+ * Updates the goal text according to user settings and progress towards goals.
+ * @param {Boolean that either updates goal text or hides it in the pop-up.} goalTextEnabled 
+ * @param {String containing the ID of the label containing the string you wish to update.} labelElementName 
+ * @param {String containing text you'd like to add to the progress label.} labelText 
+ * @param {Float containing the hours worked towards the current goal.} currentProgress 
+ * @param {Float containing the hours configured for the current goal.} goal 
+ * @param {Boolean - if true, text is colored to reflect goal progress.} dynamicGoalsEnabled 
+ */
+function updateGoalText(goalTextEnabled, labelElementName, labelText, currentProgress, goal, dynamicGoalsEnabled) {  
+    let labelElement = document.getElementById(labelElementName);
+    if (goalTextEnabled) {
+        labelElement.innerText = currentProgress.toFixed(2) + ' / ' + goal + labelText;
+        if (dynamicGoalsEnabled) {
+            updateTextColor(labelElement, currentProgress, goal);
+        }
+    } else {
+        labelElement.style.display = 'none';
+    }
+}
+
+/**
+ * Hides the target HTML element if the setting is NOT true.
+ * @param {String containing the ID of the element you wish to (possibly) hide.} elementName 
+ * @param {Boolean that determines the visibility of the element.} setting 
+ */
+function hideElement(elementName, setting) {
+    if (!setting) {
+        let popupElement = document.getElementById(elementName);
+        popupElement.style.display = 'none';
+    }
 }
 
 // request data and settings from background script to initialize fields
@@ -48,49 +97,19 @@ chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
     let dailyHourGoal = response.goals[0];
     let weeklyHourGoal = response.goals[1];
     
-    let hoursWorkedTodayLabel = document.getElementById('hoursWorkedToday');
-    if (displayDailyHoursEnabled) {
-        hoursWorkedTodayLabel.innerText = hoursWorkedToday.toFixed(2) + ' / ' + dailyHourGoal + ' hours today';
-        if (dynamicGoalsEnabled) {
-            let goalCompletionPercentage = hoursWorkedToday / dailyHourGoal;
-            hoursWorkedTodayLabel.style.color = getTextColor(goalCompletionPercentage);
-        }
-    } else {
-        hoursWorkedTodayLabel.style.display = 'none';
-    }
+    updateGoalText(displayDailyHoursEnabled, 'hoursWorkedToday', ' hours today', 
+                   hoursWorkedToday, dailyHourGoal, dynamicGoalsEnabled);
 
-    let hoursWorkedWeekLabel = document.getElementById('hoursWorkedWeek');
-    if (displayWeeklyHoursEnabled) {
-        hoursWorkedWeekLabel.innerHTML = hoursWorkedWeek.toFixed(2) + ' / ' + weeklyHourGoal + ' hours this week';
-        if (dynamicGoalsEnabled) {
-            let goalCompletionPercentage = hoursWorkedWeek / weeklyHourGoal;
-            hoursWorkedWeekLabel.style.color = getTextColor(goalCompletionPercentage);
-        }
-    } else {
-        hoursWorkedWeekLabel.style.display = 'none';
-    }
+    updateGoalText(displayWeeklyHoursEnabled, 'hoursWorkedWeek', ' hours this week', 
+                   hoursWorkedWeek, weeklyHourGoal, dynamicGoalsEnabled);
 
-    if (!taskWebsiteButtonEnabled) {
-        let taskWebsiteButton = document.getElementById('taskWebsiteButton');
-        taskWebsiteButton.style.display = 'none';
-    }
+    hideElement('taskWebsiteButton', taskWebsiteButtonEnabled);
+    hideElement('openEmployeeWebsite', employeeWebsiteButtonEnabled);
+    hideElement('openTimesheetWebsite', timesheetWebsiteButtonEnabled);
+    
+    let additionalButtonsEnabled = employeeWebsiteButtonEnabled || timesheetWebsiteButtonEnabled;
+    hideElement('additionalSiteButtons', additionalButtonsEnabled);
 
-    if (!employeeWebsiteButtonEnabled) {
-        let openEmployeeWebsite = document.getElementById('openEmployeeWebsite');
-        openEmployeeWebsite.style.display = 'none';
-    }
-    if (!timesheetWebsiteButtonEnabled) {
-        let openTimesheetWebsite = document.getElementById('openTimesheetWebsite');
-        openTimesheetWebsite.style.display = 'none';
-    }
-
-    if (!employeeWebsiteButtonEnabled && !timesheetWebsiteButtonEnabled) {
-        let additionalSiteButtons = document.getElementById('additionalSiteButtons');
-        additionalSiteButtons.style.display = 'none';
-
-        if (!taskWebsiteButtonEnabled) {
-            let buttonDivider = document.getElementById('buttonDivider');
-            buttonDivider.style.display = 'none';
-        }
-    }
+    let buttonDividerEnabled = taskWebsiteButtonEnabled || additionalButtonsEnabled;
+    hideElement('buttonDivider', buttonDividerEnabled);
 });

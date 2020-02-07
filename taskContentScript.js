@@ -1,3 +1,6 @@
+/**
+ * Reads the task time declared on the task page and returns it as a float.
+ */
 function checkTaskTime() {
     let element = document.querySelector('span.ewok-estimated-task-weight');
 
@@ -6,7 +9,9 @@ function checkTaskTime() {
     return parseFloat(contentStrings[0]);
 }
 
-// pulls the task ID from the URL (assuming the ID begins after = )
+/**
+ * Extracts the task ID from the task page URL (assuming the ID begins after = )
+ */
 function getTaskID() {
     let taskID = document.URL.split('=');
     return taskID[1];
@@ -27,11 +32,11 @@ cancelButton.onclick = (element) => {
     chrome.runtime.sendMessage({status : "cancel-task"});
 };
 
-let releaseButton = document.querySelector('div .ewok-release-buttons').querySelector('button');
-releaseButton.onclick = (element) => {
-    let radioButton = document.getElementById('ewok-release-release');
+let submitReportButton = document.querySelector('div .ewok-release-buttons').querySelector('button');
+submitReportButton.onclick = (element) => {
+    let releaseButton = document.getElementById('ewok-release-release');
     // if the user decides to release the task, cancel it
-    if (radioButton.checked) {  
+    if (releaseButton.checked) {  
         chrome.runtime.sendMessage({status : "cancel-task"});
     }  
 };

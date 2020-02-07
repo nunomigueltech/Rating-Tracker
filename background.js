@@ -1,13 +1,13 @@
 'use strict';
- 
-chrome.runtime.onConnect.addListener(port => {});
 
 var isRefreshing = true;
-var storage = [];
+var storage = []; // keeping settings in memory reduces
 var minutesWorkedWeek = 0.0; // used to provide constant time access to pop-up script
-var globalRefreshTime = 0;
-var globalRefreshInterval = null;
 
+/** 
+  *refreshTimer handles the timer that appears on the extension icon when there are
+  *no tasks available to the user and they are waiting for the next page refresh.   
+*/
 var refreshTimer = {
   time: 0,
   startTime: null,
@@ -50,34 +50,58 @@ var refreshTimer = {
   }
 }
 
+/**
+ * Handles every aspect of information regarding the status of the user's 
+ * current task.
+ */
 var currentTask = {
   time: 0.0,
   taskID: '',  
   timeout: null,
+  date: null,
   active: false,
 
-  start(taskID, time, func) {
-    let date = new Date();
-    this.startTime = date.getTime();
+  start(taskID, time) {
+    this.date = new Date();
+    this.startTime = this.date.getTime();
     this.active = true;
 
     this.taskID = taskID;
     this.time = parseFloat(time);
-    this.timeout = window.setTimeout(func, currentTask.getMilliseconds());
+    this.timeout = window.setTimeout(currentTask.taskTimeout, currentTask.getMilliseconds());
   },
 
-  getMilliseconds() {
+  getMilliseconds() { // time was standardized to minutes across the extension
     return this.time * 60000.0;
   },
 
-  // calculates the time passed in milliseconds
+  /** 
+    * Returns the time passed since the current task began in milliseconds.
+    */
   timePassed() {
     let currentTime = Date.now();
     return currentTime - this.startTime;
   },
 
+  /**
+  * Plays a random notification sound when the task timer has run out.
+  */
+  taskTimeout() {
+    console.log("Task timed out at " + currentTask.time + " minutes")
+    if (storage['timeoutSoundSetting']) {
+      let soundID = Math.ceil(Math.random() * 4);
+      let soundName = 'taskcomplete' + soundID + '.wav';
+    
+      let sound = new Audio('sounds/' + soundName);
+      sound.volume = parseInt(storage['timeoutSoundVolumeSetting'])/100.0;
+      sound.addEventListener("canplaythrough", event => {
+          sound.play();
+      });
+    }
+  },
+
   cancelTimeout() {
-    clearTimeout(this.timeout);
+    clearTimeout(currentTask.timeout);
   },
 
   clear() {
@@ -98,6 +122,10 @@ function getDateKey() {
   return getSpecificDateKey(date);
 }
 
+/**
+ * Sums hours worked across the week and stores them into global minutesWorkedWeek 
+ * for later use.
+ */
 function calculateWeekHours() {
   let date = new Date();
   date.setDate(date.getDate() - date.getDay());
@@ -121,7 +149,10 @@ function calculateWeekHours() {
   });
 }
 
-// save task when complete
+/**
+ * Handles the storing of task minutes into Chrome storage. Called when a task 
+ * has been submitted (completed). 
+ */
 function updateHours() {
   if (!currentTask.active) return;
 
@@ -143,42 +174,16 @@ function updateHours() {
   });
 }
 
-// play sound when task times out
-function taskTimeout() {
-  console.log("Task timed out at " + currentTask.time + " minutes")
-  if (storage['timeoutSoundSetting']) {
-    let soundID = Math.ceil(Math.random() * 4);
-    let soundName = 'taskcomplete' + soundID + '.wav';
-  
-    let sound = new Audio('sounds/' + soundName);
-    sound.volume = parseInt(storage['timeoutSoundVolumeSetting'])/100.0;
-    sound.addEventListener("canplaythrough", event => {
-        sound.play();
-    });
-  }
-}
-
-function resetRefreshTimer() {
-  clearInterval(globalRefreshInterval);
-  chrome.browserAction.setBadgeText({text: ''});
-}
-
-// updates extension badge text to keep track of current refresh timer
-function updateRefreshTimer() {
-  if (globalRefreshTime < 0) {
-    resetRefreshTimer();
-  } else {
-    chrome.browserAction.setBadgeText({text: globalRefreshTime-- + ''});
-  }
-}
-
-// Messages used to share data with other scripts
+/**
+ * Handles message-passing from content-scripts. Delivers cached settings/data to
+ * content scripts when requested.
+ */
 chrome.runtime.onMessage.addListener( 
   function(request, sender, sendResponse) {
     switch(request.status) {
       case 'work-available':
         isRefreshing = false;
-        resetRefreshTimer();
+        refreshTimer.clear();
         
         if (storage['refreshSoundSetting']) {
           let taskSound = new Audio('sounds/taskaccept1.mp3')
@@ -193,7 +198,7 @@ chrome.runtime.onMessage.addListener(
         isRefreshing = true;
         break;
 
-      // Supply refresh setting data to refresh content script
+      // Supply refresh setting data to refresh content script (is refresh enabled?)
       case 'return-time-interval': 
         sendResponse({value: [storage['refreshSetting'], storage['minTime'], storage['maxTime']]});
         break;
@@ -204,7 +209,7 @@ chrome.runtime.onMessage.addListener(
 
       case 'new-task':
         if (request.id != currentTask.taskID) {
-          currentTask.start(request.id, request.time, taskTimeout);
+          currentTask.start(request.id, request.time);
         }
         break;
 
@@ -220,6 +225,7 @@ chrome.runtime.onMessage.addListener(
         }
         break;
       
+      // supplies ALL of the information required to display the extension pop-up correctly
       case 'popup-data':
         var dateKey = getDateKey();
         sendResponse({hours: [storage[dateKey], minutesWorkedWeek],
@@ -230,11 +236,8 @@ chrome.runtime.onMessage.addListener(
                       goals: [storage['dailyHourGoal'], storage['weeklyHourGoal']]});
         break;
 
+      // start icon badge timer when refresh time is received from content script
       case 'refresh-timer':
-        // start icon badge timer when refresh time is received from content script
-        //globalRefreshTime = request.time - 1;
-        //resetRefreshTimer();
-        //globalRefreshInterval = setInterval(updateRefreshTimer, 1000);
         refreshTimer.clear();
         refreshTimer.start(request.time);
         break;
@@ -247,18 +250,69 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
-// handle undefined values from object literal by using default values
+/**
+ * Returns the value found in the object literal and handles undefined results.
+ * @param {Object literal that contains data retrieved from Chrome storage.} data 
+ * @param {String representing the key of the value being handled.} key 
+ * @param {If the value pulled from the object literal is undefined, this becomes its new value.} defaultValue 
+ */
 function getValue(data, key, defaultValue) {
   let result = data[key]
   if (typeof result === 'undefined') {
       result = defaultValue;
-      chrome.storage.sync.set({[key] : result});
   }
 
   return result;
 }
 
-// Store new setting changes
+/**
+ * Returns a string with an appropriate goal notification, if there is one to make. 
+ * Returns empty string if no notification will be made.
+ * @param {String representing period of time to consider. ('daily' or 'weekly')} periodID 
+ * @param {Float containing the latest minutes worked for this period.} minutesWorked 
+ */
+function getNotificationString(periodID, minutesWorked) {
+  let notificationText = ''
+  let goalHours = storage[periodID + 'HourGoal']; 
+  let goalMinutes = goalHours * 60;
+
+  if (minutesWorked < goalMinutes) {
+    let timeDifference = goalMinutes - minutesWorked;
+    let beforeGoalNotificationEnabled = storage['beforeGoalNotificationsSetting'];
+    let notificationMinutes = storage['notificationMinutes'];
+
+    if (beforeGoalNotificationEnabled && (timeDifference <= notificationMinutes)) {
+      notificationText += 'You are ' + timeDifference.toFixed(2) + ' minutes away from achieving your  goal! '; 
+    }
+  } else {
+    let goalNotificationEnabled = storage['goalNotificationsSetting'];
+
+    if (goalNotificationEnabled) {
+      notificationText += 'You have achieved your ' + periodID + ' goal of ' + goalHours + ' hours! '; 
+    }
+  }
+
+  return notificationText;
+}
+
+/**
+ * Creates a Chrome notification if a goal has been met or is close to being met.
+ * @param {Float containing the minutes worked for the day.} dailyMinutes 
+ */
+function handleNotifications(dailyMinutes) {
+  let dailyNotification = getNotificationString('daily', dailyMinutes);
+  let weeklyNotification = getNotificationString('weekly', minutesWorkedWeek);
+  let notificationText = dailyNotification + weeklyNotification;
+
+  if (notificationText != '') {
+    chrome.notifications.create({type: 'basic', iconUrl: 'images/icon128.png', title: 'Gooooooooal!!', message: notificationText});
+  }
+}
+
+/**
+ * Listens for changes in storage, which occur when new settings are saved or when
+ * a task is completed. Updates the cached storage values and handles task notifications.
+ */
 chrome.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, value] of Object.entries(changes)) {
     let todaysDateKey = getDateKey();
@@ -266,52 +320,27 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       let oldMinutes = getValue(value, 'oldValue', 0);
       let newMinutes = getValue(value, 'newValue', 0);
       let addedTime = newMinutes - oldMinutes;
-      console.log("Adding " + addedTime + " minutes to weekly hours.")
-      minutesWorkedWeek += addedTime;
+      
+      let currentDay = new Date().getDay();
+      let taskDay = currentTask.date.getDay();
 
+      // checks if user acquired task on late Saturday, but submitted it on Sunday (following week period)
+      if (taskDay == 6 && currentDay == 0) { 
+        minutesWorkedWeek = addedTime;
+      } else {
+        minutesWorkedWeek += addedTime;
+      }
+      
       chrome.runtime.sendMessage({status: "update-calendar", timeDay: newMinutes, timeWeek: minutesWorkedWeek});
-
-      // HANDLE NOTIFICATIONS 
-      let notificationText = '';
-      let dailyGoalMinutes = storage['dailyHourGoal'] * 60;
-      let weeklyGoalMinutes = storage['weeklyHourGoal'] * 60;
-      let goalNotificationEnabled = storage['goalNotificationsSetting'];
-      let beforeGoalNotificationEnabled = storage['beforeGoalNotificationsSetting'];
-      let notificationMinutes = storage['notificationMinutes'];
-      if (newMinutes < dailyGoalMinutes) {
-        let timeDifference = dailyGoalMinutes - newMinutes;
-        if (beforeGoalNotificationEnabled && (timeDifference <= notificationMinutes)) {
-          notificationText = notificationText + 'You are ' + timeDifference.toFixed(2) + ' minutes away from achieving your daily goal! '; 
-        }
-      } else {
-        if (goalNotificationEnabled) {
-          notificationText = notificationText + 'You have achieved your daily goal of ' + storage['dailyHourGoal'] + ' hours! '; 
-        }
-      }
-
-      if (minutesWorkedWeek < weeklyGoalMinutes) {
-        let timeDifference = weeklyGoalMinutes - minutesWorkedWeek;
-        if (beforeGoalNotificationEnabled && (timeDifference <= notificationMinutes)) {
-          notificationText = notificationText + 'You are ' + timeDifference.toFixed(2) + ' minutes away from achieving your weekly goal!'; 
-        }
-      } else {
-        if (goalNotificationEnabled) {
-          notificationText = notificationText + 'You have achieved your weekly goal of ' + storage['weeklyHourGoal'] + ' hours!'; 
-        }
-      }
-
-      if (notificationText != '') {
-        chrome.notifications.create({type: 'basic', iconUrl: 'images/icon128.png', title: 'Gooooooooal!!', message: notificationText});
-      }
+      handleNotifications(newMinutes);
     }
 
     if (key === 'refreshTimerSetting') {
-      if (!value.newValue) {
-        console.log("Trying to clear")
-        refreshTimer.clear();
-        //resetRefreshTimer();
-      } else {
+      let refreshTimerEnabled = value.newValue;
+      if (refreshTimerEnabled) { 
         refreshTimer.restart();
+      } else {
+        refreshTimer.clear();
       }
     }
 
@@ -319,6 +348,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
+/**
+ * Loads all settings from storage into a cached array.
+ */
 function initializeStorage() {
   var dateKey = getDateKey();
   chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',

@@ -1,13 +1,9 @@
-var isRunning = true;
-
-chrome.runtime.connect().onDisconnect.addListener(function() {
-    isRunning = false;
-});
-
-// NO TASKS CLASS - h2. ewok-rater-task-header ewok-rater-no-tasks
+/*
+ *Checks the web-page for work and sends message to the background script with its result.
+*/
 function checkWork() {
-    let taskList = document.querySelector('div.container');
-    if (taskList.innerText.includes('Acquire if available') || taskList.innerText.includes('Incomplete Tasks')) {
+    let taskListText = document.querySelector('div.container').innerText;
+    if (taskListText.includes('Acquire if available') || taskListText.includes('Incomplete Tasks')) {
         chrome.runtime.sendMessage({status : 'work-available'});
     } else {
         chrome.runtime.sendMessage({status : 'work-unavailable'});
@@ -15,17 +11,12 @@ function checkWork() {
 }
 
 function handleRefresh() {
-    if (!isRunning) return;
-
     window.location.reload();
     checkWork();
 }
 
-var minTime = 0;
-var maxTime = 0;
-
 checkWork();
-chrome.runtime.sendMessage({status : 'return-refresh-status'}, (response) => {
+chrome.runtime.sendMessage({status : 'return-refresh-status'}, (response) => { 
     let refreshStatus = response.value;
 
     if (refreshStatus) {
@@ -33,8 +24,8 @@ chrome.runtime.sendMessage({status : 'return-refresh-status'}, (response) => {
             let refreshEnabled = response.value[0];
 
             if (refreshEnabled) {
-                minTime = parseInt(response.value[1]);
-                maxTime = parseInt(response.value[2]);
+                let minTime = parseInt(response.value[1]);
+                let maxTime = parseInt(response.value[2]);
             
                 let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
                 setTimeout(handleRefresh, waitTime * 1000);

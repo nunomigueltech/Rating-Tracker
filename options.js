@@ -1,4 +1,9 @@
 // START OF UI HANDLING
+
+/**
+ * Changes content visible to the user according to the tab ID selected.
+ * @param {Integer reflecting tab ID in options menu.} tabIndex 
+ */
 function selectTab(tabIndex) {
     //Hide All Tabs
     document.getElementById('tab1Content').style.display="none";
@@ -24,7 +29,11 @@ tab3.onclick = (element) => {
     selectTab(3);
 }
 
-// enable or disable the minimum/maximum time fields
+/**
+ * Updates the status of min/max refresh time fields. Updated when settings are loaded 
+ * and on interaction with the enable/disable refresh radiobuttons.
+ * @param {Boolean that disables min/max refresh fields if FALSE} areFieldsDisabled 
+ */
 function updateRefreshFields(areFieldsDisabled) {
     document.getElementById('minTime').disabled = areFieldsDisabled;
     document.getElementById('maxTime').disabled = areFieldsDisabled;
@@ -44,10 +53,16 @@ resetButton.onclick = (element) => {
     if (confirm("Are you sure that want to clear ALL extension storage? This includes your settings and your recorded hours.")) {
         chrome.storage.sync.clear();
         window.location.reload();
-        chrome.runtime.sendMessage({status : 'reset-storage'});
+        chrome.runtime.sendMessage({status : 'reset-storage'}); // tell background script to reset cached settings
     }
 };
 
+/**
+ * Updates the Hour View in the options menu.
+ * @param {Date object to be used for each operation.} dateObject 
+ * @param {Integer that should be initialized to 0. Used as accumulator for recursion.} dayCounter 
+ * @param {Float that tracks the minutes worked throughout the week. Initialized to 0.0} minutes 
+ */
 function loadWeek(dateObject, dayCounter, minutes) {
     if (dayCounter > 6 || dayCounter < 0) return;
 
@@ -144,6 +159,13 @@ chrome.runtime.onMessage.addListener(
 // END OF UI HANDLING
 
 // START OF INTERNAL HANDLING
+
+/**
+ * Reads value from the object literal and sets a default value if it was undefined.
+ * @param {Object literal to read data from.} data 
+ * @param {String containing the key to access data to verify.} key 
+ * @param {Variable that contains a back-up value for undefined entries.} defaultValue 
+ */
 function getValue(data, key, defaultValue) {
     let result = data[key]
     if (typeof result === 'undefined') {
@@ -154,6 +176,15 @@ function getValue(data, key, defaultValue) {
     return result;
 }
 
+/**
+ * Updates field values such that the min value is always smaller than the max and the
+ * value of each field does not go below a certain value.
+ * @param {Float containing the minimum value allowed on text fields.} minValue 
+ * @param {Float representing the min. value we are testing.} minVariable 
+ * @param {Float representing the max. value we are testing.} maxVariable 
+ * @param {String containing the ID of the min. value field.} minElementID 
+ * @param {String containing the ID of the max. value field.} maxElementID 
+ */
 function updateMinMaxFields(minValue, minVariable, maxVariable, minElementID, maxElementID) {
     if (minVariable < minValue) {
         minVariable = minValue;
