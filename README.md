@@ -3,5 +3,6 @@ Google Chrome extension that automatically tracks your work hours in a manner th
 <br>
 <p align="center">
   <img src="https://i.postimg.cc/sDbP4M06/image.png">
-  <img align="center" src="https://i.postimg.cc/cC23hzTg/image.png">
+  <img src="https://i.postimg.cc/cC23hzTg/image.png">
+  <img src="https://i.postimg.cc/Njz6bpfw/image.png">
 </p>
