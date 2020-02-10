@@ -4,7 +4,8 @@
   "description": "Refreshes Lionbridge task pages in search of work.",
   "permissions": ["webNavigation", "storage", "tabs", "notifications"],
   "web_accessible_resources": [
-    "images/*.png"
+    "images/*.png",
+    "sounds/*"
   ],
   "background": {
     "scripts": ["background.js"],

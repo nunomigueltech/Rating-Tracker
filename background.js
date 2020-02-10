@@ -62,13 +62,15 @@ var currentTask = {
   active: false,
 
   start(taskID, time) {
+    if (taskID == currentTask.taskID) return; 
+    
     this.date = new Date();
     this.startTime = this.date.getTime();
     this.active = true;
 
     this.taskID = taskID;
     this.time = parseFloat(time);
-    this.timeout = window.setTimeout(currentTask.taskTimeout, currentTask.getMilliseconds());
+    console.log("New task added - ID: " + taskID + " and Time: " + time + " minutes.")
   },
 
   getMilliseconds() { // time was standardized to minutes across the extension
@@ -83,30 +85,8 @@ var currentTask = {
     return currentTime - this.startTime;
   },
 
-  /**
-  * Plays a random notification sound when the task timer has run out.
-  */
-  taskTimeout() {
-    console.log("Task timed out at " + currentTask.time + " minutes")
-    if (storage['timeoutSoundSetting']) {
-      let soundID = Math.ceil(Math.random() * 4);
-      let soundName = 'taskcomplete' + soundID + '.wav';
-    
-      let sound = new Audio('sounds/' + soundName);
-      sound.volume = parseInt(storage['timeoutSoundVolumeSetting'])/100.0;
-      sound.addEventListener("canplaythrough", event => {
-          sound.play();
-      });
-    }
-  },
-
-  cancelTimeout() {
-    clearTimeout(currentTask.timeout);
-  },
-
   clear() {
     this.active = false;
-    this.cancelTimeout();
   }
 };
 
@@ -208,6 +188,8 @@ chrome.runtime.onMessage.addListener(
         break;
 
       case 'new-task':
+        console.log("New task request - ID: " + request.id + " and Time: " + request.time + " minutes.")
+        sendResponse({timeoutEnabled: storage['timeoutSoundSetting'], timeoutVolume: storage['timeoutSoundVolumeSetting']});
         if (request.id != currentTask.taskID) {
           currentTask.start(request.id, request.time);
         }
@@ -220,6 +202,7 @@ chrome.runtime.onMessage.addListener(
         break;
 
       case 'submit-task':
+        console.log("Task submitted")
         if (currentTask.active) {
           updateHours();
         }
