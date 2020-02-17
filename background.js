@@ -58,7 +58,7 @@ var currentTask = {
   time: 0.0,
   taskID: '',  
   timeout: null,
-  date: null,
+  date: new Date(),
   active: false,
 
   start(taskID, time) {
@@ -137,21 +137,20 @@ function updateHours() {
   if (!currentTask.active) return;
 
   var dateString = getDateKey();
-  chrome.storage.sync.get(dateString, (items) => {
-    let minutes = storage[dateString];
-    let minutesPassed = currentTask.timePassed() / 60000;
+  let minutes = storage[dateString];
+  let minutesPassed = currentTask.timePassed() / 60000;
 
-    if (minutesPassed < currentTask.time) {
-      console.log("Logging " + minutesPassed + " minutes (" + minutesPassed + " < " + currentTask.time + ")")
-      minutes += minutesPassed;
-    } else {
-      console.log("Logging " + currentTask.time + " minutes.")
-      minutes += currentTask.time;
-    }
+  if (minutesPassed < currentTask.time) {
+    console.log("Logging " + minutesPassed + " minutes (" + minutesPassed + " < " + currentTask.time + ")")
+    minutes += minutesPassed;
+  } else {
+    console.log("Logging " + currentTask.time + " minutes.")
+    minutes += currentTask.time;
+  }
 
-    currentTask.clear();
-    chrome.storage.sync.set({[dateString] : minutes});
-  });
+  currentTask.clear();
+  console.log("Setting time to " + minutes);
+  chrome.storage.sync.set({[dateString] : minutes});
 }
 
 /**
@@ -210,7 +209,7 @@ chrome.runtime.onMessage.addListener(
       
       // supplies ALL of the information required to display the extension pop-up correctly
       case 'popup-data':
-        var dateKey = getDateKey();
+        let dateKey = getDateKey();
         sendResponse({hours: [storage[dateKey], minutesWorkedWeek],
                       data: [storage['dailyHourDisplaySetting'], storage['weeklyHourDisplaySetting'], storage['dynamicGoalsSetting']], 
                       taskWebsite: [storage['taskWebsiteSetting'], storage['taskWebsiteURLSetting']], 
@@ -313,6 +312,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       } else {
         minutesWorkedWeek += addedTime;
       }
+      console.log("Adding " + addedTime + " to total time, now " + minutesWorkedWeek + " minutes this week")
+      console.log("Storing value: " + getValue(value, 'newValue', value['oldValue']))
       
       chrome.runtime.sendMessage({status: "update-calendar", timeDay: newMinutes, timeWeek: minutesWorkedWeek});
       handleNotifications(newMinutes);
@@ -376,5 +377,10 @@ function initializeStorage() {
   });
 }
 
-initializeStorage();
-calculateWeekHours();
+//onInstalled - local testing
+//onStartup - actual event
+chrome.runtime.onInstalled.addListener(function() {
+  initializeStorage();
+  calculateWeekHours();
+  //chrome.storage.sync.set({[getDateKey()] : 5});
+});

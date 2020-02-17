@@ -79,8 +79,10 @@ function hideElement(elementName, setting) {
     }
 }
 
+debugger;
 // request data and settings from background script to initialize fields
 chrome.runtime.sendMessage({status : "popup-data"}, (response) => {
+    console.log(response)
     let minutesWorkedToday = parseFloat(response.hours[0]);
     let hoursWorkedToday = minutesWorkedToday / 60.0;
     let minutesWorkedWeek = parseFloat(response.hours[1]);
