@@ -73,10 +73,6 @@ var currentTask = {
     console.log("New task added - ID: " + taskID + " and Time: " + time + " minutes.")
   },
 
-  getMilliseconds() { // time was standardized to minutes across the extension
-    return this.time * 60000.0;
-  },
-
   /** 
     * Returns the time passed since the current task began in milliseconds.
     */
@@ -130,30 +126,6 @@ function calculateWeekHours() {
 }
 
 /**
- * Handles the storing of task minutes into Chrome storage. Called when a task 
- * has been submitted (completed). 
- */
-function updateHours() {
-  if (!currentTask.active) return;
-
-  var dateString = getDateKey();
-  let minutes = storage[dateString];
-  let minutesPassed = currentTask.timePassed() / 60000;
-
-  if (minutesPassed < currentTask.time) {
-    console.log("Logging " + minutesPassed + " minutes (" + minutesPassed + " < " + currentTask.time + ")")
-    minutes += minutesPassed;
-  } else {
-    console.log("Logging " + currentTask.time + " minutes.")
-    minutes += currentTask.time;
-  }
-
-  currentTask.clear();
-  console.log("Setting time to " + minutes);
-  chrome.storage.sync.set({[dateString] : minutes});
-}
-
-/**
  * Handles message-passing from content-scripts. Delivers cached settings/data to
  * content scripts when requested.
  */
@@ -203,7 +175,9 @@ chrome.runtime.onMessage.addListener(
       case 'submit-task':
         console.log("Task submitted")
         if (currentTask.active) {
-          updateHours();
+          let minutesPassed = currentTask.timePassed() / 60000;
+          currentTask.clear();
+          sendResponse({timePassed: minutesPassed});
         }
         break;
       
@@ -379,8 +353,8 @@ function initializeStorage() {
 
 //onInstalled - local testing
 //onStartup - actual event
-chrome.runtime.onInstalled.addListener(function() {
+//chrome.runtime.onStartup.addListener(function() {
   initializeStorage();
   calculateWeekHours();
-  //chrome.storage.sync.set({[getDateKey()] : 5});
-});
+  //chrome.storage.sync.set({[getDateKey()] : 6});
+//});
