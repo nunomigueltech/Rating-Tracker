@@ -5,7 +5,6 @@ function getTaskTime() {
     let element = document.querySelector('span.ewok-estimated-task-weight');
 
     let contentStrings = element.innerText.split(" ");
-    console.log("Found " + contentStrings[0] + " minute task")
     return parseFloat(contentStrings[0]);
 }
 
@@ -21,10 +20,10 @@ function getTaskID() {
 * Plays a random notification sound when the task timer has run out.
 */
 function taskTimeout(soundVolume) {
-    console.log("Task timed out at " + taskTime + " minutes")
+    console.log('Task timed out. Loading audio data...');
     let soundID = Math.ceil(Math.random() * 4);
     let soundName = 'taskcomplete' + soundID + '.wav';
-    let soundURL = chrome.runtime.getURL('sounds/' + soundName)
+    let soundURL = chrome.runtime.getURL('sounds/' + soundName);
 
     let sound = new Audio(soundURL);
     sound.volume = parseInt(soundVolume)/100.0;
@@ -33,49 +32,14 @@ function taskTimeout(soundVolume) {
     });
 }
 
-function getDateKey() {
-    let dateObj = new Date();
-    var dateString = dateObj.getMonth() + '/' + dateObj.getDate() + '/' + dateObj.getFullYear();
-
-    return dateString;
-}
-
-/***
- * Saves (to local/sync storage) the time the user spent working on the current task. Done in content script
- * instead of background script due to synchronization issues. Rather than making the extension persistent, messaging
- * is used.
- * @param minutesPassed
- */
-function submitHours(minutesPassed) {
-    var dateString = getDateKey();
-    let taskTimeLimit = getTaskTime();
-    let minutesWorked = ((minutesPassed < taskTimeLimit) ?  minutesPassed : taskTimeLimit);
-
-    chrome.storage.sync.get([dateString], function(result) {
-        let minutesRecorded = result[dateString];
-        if (minutesRecorded === 'undefined') {
-            minutesRecorded = 0.0;
-        }
-        let totalMinutes = minutesRecorded + minutesWorked;
-
-        chrome.storage.sync.set({[dateString] : totalMinutes}, function() {
-            console.log("Logging " + minutesWorked + " minutes for a total of " + totalMinutes + " minutes.")
-        });
-    });
-}
-
 let submitButton = document.querySelector('button#ewok-task-submit-button');
 submitButton.onclick = (element) => {
-    chrome.runtime.sendMessage({status : "submit-task"}, function(response) {
-        submitHours(response.timePassed);
-    });
+    chrome.runtime.sendMessage({status : "submit-task"});
 };
 
 let stopButton = document.querySelector('button#ewok-task-submit-done-button');
 stopButton.onclick = (element) => {
-    chrome.runtime.sendMessage({status : "submit-task"}, function(response) {
-        submitHours(response.timePassed);
-    });
+    chrome.runtime.sendMessage({status : "submit-task"});
 };
 
 let cancelButton = document.querySelector('button#ewok-task-cancel-button');
@@ -92,14 +56,49 @@ submitReportButton.onclick = (element) => {
     }  
 };
 
-let taskTime = getTaskTime();
-chrome.runtime.sendMessage({status : "new-task", time : taskTime, id : getTaskID()}, function(response) {
-    let soundEnabled = response.timeoutEnabled;
-    let soundVolume = response.timeoutVolume;
+/***
+ * Sets a timeout to play task alarm sound.
+ * @param {string} taskTimestamp Returned from Date getTime()
+ */
+function loadAlarm(taskTimestamp) {
+    chrome.storage.sync.get(['timeoutSoundSetting', 'timeoutSoundVolumeSetting'], (settings) => {
+        let soundEnabled = settings['timeoutSoundSetting'];
 
-    if (soundEnabled) {
-        window.setTimeout(function() {
-            taskTimeout(soundVolume)
-        }, taskTime * 60000);
-    }
-});
+        if (soundEnabled) {
+            let taskLength = getTaskTime();
+            let soundVolume = settings['timeoutSoundVolumeSetting'];
+            let taskTimeMilliseconds = taskLength * 60000;
+            let currentTime = new Date().getTime(); // time in milliseconds
+            let taskTimeElapsed = currentTime - taskTimestamp;
+            let taskTimeRemaining = taskTimeMilliseconds - taskTimeElapsed;
+
+            console.log('Active task is ' + taskLength + ' minutes long');
+            if (taskTimeRemaining > 0) {
+                console.log('Setting alarm for task!');
+                window.setTimeout(function() {
+                    taskTimeout(soundVolume);
+                }, taskTimeRemaining);
+            }
+        }
+    });
+}
+
+function initialize() {
+    // set internal task ID
+    chrome.storage.local.get(['taskID', 'taskTimestamp'], (task) => {
+        let internalTaskID = task['taskID'];
+        let pageTaskID = getTaskID();
+
+        if (internalTaskID != pageTaskID) {
+            console.log('Tracking new task (ID:' + pageTaskID + ')');
+            let currentTime = new Date().getTime();
+            chrome.storage.local.set({'taskID': pageTaskID, 'taskTimestamp': currentTime, 'taskTime': getTaskTime(),
+                                      'taskActive': true}, () => { loadAlarm(currentTime); });
+        } else {
+            console.log('Resuming tracking for task (ID:' + pageTaskID + ')');
+            loadAlarm(task['taskTimestamp']); // alarm needs to be loaded each time the page refreshes, even if it's the same task
+        }
+    });
+}
+
+initialize();

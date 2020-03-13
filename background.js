@@ -1,14 +1,10 @@
 'use strict';
 
-var isRefreshing = true;
-var storage = []; // keeping settings in memory reduces
-var minutesWorkedWeek = 0.0; // used to provide constant time access to pop-up script
-
-/** 
-  *refreshTimer handles the timer that appears on the extension icon when there are
-  *no tasks available to the user and they are waiting for the next page refresh.   
-*/
-var refreshTimer = {
+/**
+ *refreshTimer handles the timer that appears on the extension icon when there are
+ *no tasks available to the user and they are waiting for the next page refresh.
+ */
+const refreshTimer = {
   time: 0,
   startTime: null,
   interval: null,
@@ -17,9 +13,7 @@ var refreshTimer = {
     this.time = time;
     let date = new Date();
     this.startTime = date.getTime();
-    if (storage['refreshTimerSetting']) {
-      this.interval = window.setInterval(refreshTimer.update, 1000);
-    }
+    this.interval = window.setInterval(refreshTimer.update, 1000);
   },
 
   restart() {
@@ -36,7 +30,7 @@ var refreshTimer = {
   },
 
   update() {
-    console.log("Updating refresh timer")
+    console.log("Updating refresh timer");
     if (refreshTimer.time < 0) {
       refreshTimer.clear();
     } else {
@@ -48,59 +42,52 @@ var refreshTimer = {
     window.clearInterval(refreshTimer.interval);
     chrome.browserAction.setBadgeText({text: ''});
   }
+};
+
+/**
+ * Returns a string that can be used to lookup work data from a particular day.
+ * @param {Object} dateObj that represents that day you want to look up
+ * @returns {string} containing date
+ */
+function getSpecificDateKey(dateObj) {
+  return dateObj.getMonth() + '/' + dateObj.getDate() + '/' + dateObj.getFullYear();
 }
 
 /**
- * Handles every aspect of information regarding the status of the user's 
- * current task.
+ * Returns a string that can be used to lookup work data from the current day.
+ * @returns {string} containing date
  */
-var currentTask = {
-  time: 0.0,
-  taskID: '',  
-  timeout: null,
-  date: new Date(),
-  active: false,
-
-  start(taskID, time) {
-    if (taskID == currentTask.taskID) return; 
-    
-    this.date = new Date();
-    this.startTime = this.date.getTime();
-    this.active = true;
-
-    this.taskID = taskID;
-    this.time = parseFloat(time);
-    console.log("New task added - ID: " + taskID + " and Time: " + time + " minutes.")
-  },
-
-  /** 
-    * Returns the time passed since the current task began in milliseconds.
-    */
-  timePassed() {
-    let currentTime = Date.now();
-    return currentTime - this.startTime;
-  },
-
-  clear() {
-    this.active = false;
-  }
-};
-
-function getSpecificDateKey(dateObj) {
-  var dateString = dateObj.getMonth() + '/' + dateObj.getDate() + '/' + dateObj.getFullYear();
-  
-  return dateString;
-}
-
 function getDateKey() {
   let date = new Date();
 
   return getSpecificDateKey(date);
 }
 
+function submitHours() {
+  const dateString = getDateKey();
+  chrome.storage.sync.get(dateString, (data) => {
+    chrome.storage.local.get(['taskTimestamp', 'taskTime'], (taskInfo) => {
+      let taskTimeLimit = taskInfo['taskTime'];
+      let currentTime = new Date().getTime(); // time in milliseconds
+      let taskTimeElapsed = currentTime - taskInfo['taskTimestamp'];
+
+      let minutesElapsed = taskTimeElapsed / 60000;
+      let minutesWorked = ((minutesElapsed < taskTimeLimit) ?  minutesElapsed : taskTimeLimit);
+
+      console.log("Logging now..");
+      let minutesRecorded = getValue(data, dateString, 0.0);
+      let totalMinutes = minutesRecorded + minutesWorked;
+
+      chrome.storage.sync.set({[dateString] : totalMinutes}, function() {
+        console.log("Logging " + minutesWorked + " minutes for a total of " + totalMinutes + " minutes.")
+      });
+      chrome.storage.local.set({'taskActive': false});
+    })
+  });
+}
+
 /**
- * Sums hours worked across the week and stores them into global minutesWorkedWeek 
- * for later use.
+ * Sums hours worked across the week
  */
 function calculateWeekHours() {
   let date = new Date();
@@ -112,17 +99,23 @@ function calculateWeekHours() {
     date.setDate(date.getDate() + 1);
   }
 
-  let totalMinutes = 0.0;
-  chrome.storage.sync.get(dateKeys, (items) => {
-    let values = Object.values(items)
-    for (let i = 0; i < values.length; i++) {
-      if (values[i] !== 'undefined') {
-        totalMinutes += parseFloat(values[i]);
-      } 
-    }
+  return new Promise((resolve, reject) => {
+    let totalMinutes = 0.0;
+    chrome.storage.sync.get(dateKeys, (items) => {
+      let values = Object.values(items);
+      for (let i = 0; i < values.length; i++) {
+        if (values[i] !== 'undefined') {
+          totalMinutes += values[i];
+        }
+      }
 
-    minutesWorkedWeek = totalMinutes;
-  });
+      if (totalMinutes === 'undefined') {
+        reject(null);
+      } else {
+        resolve(totalMinutes)
+      }
+    });
+  })
 }
 
 /**
@@ -132,64 +125,21 @@ function calculateWeekHours() {
 chrome.runtime.onMessage.addListener( 
   function(request, sender, sendResponse) {
     switch(request.status) {
-      case 'work-available':
-        isRefreshing = false;
-        refreshTimer.clear();
-        
-        if (storage['refreshSoundSetting']) {
-          let taskSound = new Audio('sounds/taskaccept1.mp3')
-          taskSound.volume = parseInt(storage['refreshSoundVolumeSetting'])/100.0;
-          taskSound.addEventListener('canplaythrough', event => {
-            taskSound.play();
-          });
-        }
-        break;
-
-      case 'work-unavailable':
-        isRefreshing = true;
-        break;
-
-      // Supply refresh setting data to refresh content script (is refresh enabled?)
-      case 'return-time-interval': 
-        sendResponse({value: [storage['refreshSetting'], storage['minTime'], storage['maxTime']]});
-        break;
-
-      case 'return-refresh-status':
-        sendResponse({value: isRefreshing});
-        break;
-
-      case 'new-task':
-        console.log("New task request - ID: " + request.id + " and Time: " + request.time + " minutes.")
-        sendResponse({timeoutEnabled: storage['timeoutSoundSetting'], timeoutVolume: storage['timeoutSoundVolumeSetting']});
-        if (request.id != currentTask.taskID) {
-          currentTask.start(request.id, request.time);
-        }
-        break;
-
       case 'cancel-task':
-        if (currentTask.active) {
-          currentTask.clear();
-        }
+        chrome.storage.local.get('taskActive', (status) => {
+          if (status['taskActive']) {
+            chrome.storage.local.set({'taskID': -1, 'taskTimestamp': null, 'taskTime': 0, 'taskActive': false});
+          }
+        });
         break;
 
       case 'submit-task':
-        console.log("Task submitted")
-        if (currentTask.active) {
-          let minutesPassed = currentTask.timePassed() / 60000;
-          currentTask.clear();
-          sendResponse({timePassed: minutesPassed});
-        }
-        break;
-      
-      // supplies ALL of the information required to display the extension pop-up correctly
-      case 'popup-data':
-        let dateKey = getDateKey();
-        sendResponse({hours: [storage[dateKey], minutesWorkedWeek],
-                      data: [storage['dailyHourDisplaySetting'], storage['weeklyHourDisplaySetting'], storage['dynamicGoalsSetting']], 
-                      taskWebsite: [storage['taskWebsiteSetting'], storage['taskWebsiteURLSetting']], 
-                      employeeWebsite: [storage['employeeWebsiteSetting'], storage['employeeWebsiteURLSetting']],
-                      timesheetWebsite: [storage['timesheetWebsiteSetting'], storage['timesheetWebsiteURLSetting']], 
-                      goals: [storage['dailyHourGoal'], storage['weeklyHourGoal']]});
+        console.log("Task submitted");
+        chrome.storage.local.get('taskActive', (status) => {
+          if (status['taskActive']) {
+            submitHours();
+          }
+        });
         break;
 
       // start icon badge timer when refresh time is received from content script
@@ -197,23 +147,18 @@ chrome.runtime.onMessage.addListener(
         refreshTimer.clear();
         refreshTimer.start(request.time);
         break;
-
-      case 'reset-storage':
-        initializeStorage();
-        calculateWeekHours();
-        break;
     }
   }
 );
 
 /**
  * Returns the value found in the object literal and handles undefined results.
- * @param {Object literal that contains data retrieved from Chrome storage.} data 
- * @param {String representing the key of the value being handled.} key 
- * @param {If the value pulled from the object literal is undefined, this becomes its new value.} defaultValue 
+ * @param {Object} data Object literal that contains data retrieved from Chrome storage.
+ * @param {string} key String representing the key of the value being handled.
+ * @param {*} defaultValue If the value pulled from the object literal is undefined, this becomes its new value.
  */
 function getValue(data, key, defaultValue) {
-  let result = data[key]
+  let result = data[key];
   if (typeof result === 'undefined') {
       result = defaultValue;
   }
@@ -224,12 +169,14 @@ function getValue(data, key, defaultValue) {
 /**
  * Returns a string with an appropriate goal notification, if there is one to make. 
  * Returns empty string if no notification will be made.
- * @param {String representing period of time to consider. ('daily' or 'weekly')} periodID 
- * @param {Float containing the latest minutes worked for this period.} minutesWorked 
+ * @param {string} periodID String representing period of time to consider. ('daily' or 'weekly')
+ * @param {Object} storage Object literal containing values for beforeGoalNotificationsSetting, goalNotificationsSetting,
+*                  and notificationMinutes from sync storage.
+ * @param {number} minutesWorked Float containing the latest minutes worked for this period.
  */
-function getNotificationString(periodID, minutesWorked) {
-  let notificationText = ''
-  let goalHours = storage[periodID + 'HourGoal']; 
+function getNotificationString(periodID, storage, minutesWorked) {
+  let notificationText = '';
+  let goalHours = storage[periodID + 'HourGoal'];
   let goalMinutes = goalHours * 60;
 
   if (minutesWorked < goalMinutes) {
@@ -238,13 +185,13 @@ function getNotificationString(periodID, minutesWorked) {
     let notificationMinutes = storage['notificationMinutes'];
 
     if (beforeGoalNotificationEnabled && (timeDifference <= notificationMinutes)) {
-      notificationText += 'You are ' + timeDifference.toFixed(2) + ' minutes away from achieving your  goal! '; 
+      notificationText += 'You are ' + timeDifference.toFixed(2) + ' minutes away from achieving your ' + periodID + ' goal! ';
     }
   } else {
     let goalNotificationEnabled = storage['goalNotificationsSetting'];
 
     if (goalNotificationEnabled) {
-      notificationText += 'You have achieved your ' + periodID + ' goal of ' + goalHours + ' hours! '; 
+      notificationText += 'You have achieved your ' + periodID + ' goal of ' + goalHours + ' hours! ';
     }
   }
 
@@ -253,16 +200,20 @@ function getNotificationString(periodID, minutesWorked) {
 
 /**
  * Creates a Chrome notification if a goal has been met or is close to being met.
- * @param {Float containing the minutes worked for the day.} dailyMinutes 
+ * @param {number} dailyMinutes Float containing the minutes worked for the day.
+ * @param {number} weeklyMinutes Float containing the minutes worked for the week.
  */
-function handleNotifications(dailyMinutes) {
-  let dailyNotification = getNotificationString('daily', dailyMinutes);
-  let weeklyNotification = getNotificationString('weekly', minutesWorkedWeek);
-  let notificationText = dailyNotification + weeklyNotification;
+function handleNotifications(dailyMinutes, weeklyMinutes) {
+  chrome.storage.sync.get(['dailyHourGoal', 'weeklyHourGoal', 'beforeGoalNotificationsSetting', 'notificationMinutes',
+    'goalNotificationsSetting'], (storage) => {
+    let dailyNotification = getNotificationString('daily', storage, dailyMinutes);
+    let weeklyNotification = getNotificationString('weekly', storage, weeklyMinutes);
+    let notificationText = dailyNotification + weeklyNotification;
 
-  if (notificationText != '') {
-    chrome.notifications.create({type: 'basic', iconUrl: 'images/icon128.png', title: 'Gooooooooal!!', message: notificationText});
-  }
+    if (notificationText != '') {
+      chrome.notifications.create({type: 'basic', iconUrl: 'images/icon128.png', title: 'Gooooooooal!!', message: notificationText});
+    }
+  });
 }
 
 /**
@@ -275,22 +226,17 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     if (key === todaysDateKey) {
       let oldMinutes = getValue(value, 'oldValue', 0);
       let newMinutes = getValue(value, 'newValue', 0);
-      let addedTime = newMinutes - oldMinutes;
-      
-      let currentDay = new Date().getDay();
-      let taskDay = currentTask.date.getDay();
 
-      // checks if user acquired task on late Saturday, but submitted it on Sunday (following week period)
-      if (taskDay == 6 && currentDay == 0) { 
-        minutesWorkedWeek = addedTime;
-      } else {
-        minutesWorkedWeek += addedTime;
+      if (newMinutes > oldMinutes) {
+        calculateWeekHours()
+            .then(function(weeklyMinutes) {
+              chrome.runtime.sendMessage({status: "update-calendar", timeDay: newMinutes, timeWeek: weeklyMinutes});
+              handleNotifications(newMinutes, weeklyMinutes);
+            })
+            .catch(function(val) {
+              console.log('ERROR: Couldnt calculate weekly work hours.')
+            });
       }
-      console.log("Adding " + addedTime + " to total time, now " + minutesWorkedWeek + " minutes this week")
-      console.log("Storing value: " + getValue(value, 'newValue', value['oldValue']))
-      
-      chrome.runtime.sendMessage({status: "update-calendar", timeDay: newMinutes, timeWeek: minutesWorkedWeek});
-      handleNotifications(newMinutes);
     }
 
     if (key === 'refreshTimerSetting') {
@@ -301,60 +247,33 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         refreshTimer.clear();
       }
     }
-
-    storage[key] = getValue(value, 'newValue', value['oldValue']); // keep old value if new one is undefined
   }
 });
 
-/**
- * Loads all settings from storage into a cached array.
- */
-function initializeStorage() {
-  var dateKey = getDateKey();
-  chrome.storage.sync.get(['minTime', 'maxTime', 'refreshSetting', 'refreshSoundSetting',
-                           'refreshSoundVolumeSetting', 'timeoutSoundSetting', 
-                           'timeoutSoundVolumeSetting', 'dailyHourDisplaySetting',
-                           'weeklyHourDisplaySetting', 'refreshTimerSetting', 
-                           'taskWebsiteSetting', 'taskWebsiteURLSetting', 
-                           'employeeWebsiteSetting', 'employeeWebsiteURLSetting',
-                           'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting',
-                           'dynamicGoalsSetting', 'dailyHourGoal', 'weeklyHourGoal',
-                           'goalNotificationsSetting', 'beforeGoalNotificationsSetting',
-                           'notificationMinutes', dateKey], (data) => {
-    if (data == null) {
-      console.error("Failed to load information from Google Chrome storage.");
-    } else {
-      storage['minTime'] = getValue(data, 'minTime', 30);
-      storage['maxTime'] = getValue(data, 'maxTime', 60);
-      storage['refreshSetting'] = getValue(data, 'refreshSetting', true);
-      storage['refreshSoundSetting'] = getValue(data, 'refreshSoundSetting', true);
-      storage['refreshSoundVolumeSetting'] = getValue(data, 'refreshSoundVolumeSetting', 100);
-      storage['timeoutSoundSetting'] = getValue(data, 'timeoutSoundSetting', true);
-      storage['timeoutSoundVolumeSetting'] = getValue(data, 'timeoutSoundVolumeSetting', 100);
-      storage['dailyHourDisplaySetting'] = getValue(data, 'dailyHourDisplaySetting', true);
-      storage['weeklyHourDisplaySetting'] = getValue(data, 'weeklyHourDisplaySetting', true);
-      storage['refreshTimerSetting'] = getValue(data, 'refreshTimerSetting', true);
-      storage['taskWebsiteSetting'] = getValue(data, 'taskWebsiteSetting', false);
-      storage['taskWebsiteURLSetting'] = getValue(data, 'taskWebsiteURLSetting', '');
-      storage['employeeWebsiteSetting'] = getValue(data, 'employeeWebsiteSetting', false);
-      storage['employeeWebsiteURLSetting'] = getValue(data, 'employeeWebsiteURLSetting', '');
-      storage['timesheetWebsiteSetting'] = getValue(data, 'timesheetWebsiteSetting', false);
-      storage['timesheetWebsiteURLSetting'] = getValue(data, 'timesheetWebsiteURLSetting', '');
-      storage['dynamicGoalsSetting'] = getValue(data, 'dynamicGoalsSetting', false);
-      storage['dailyHourGoal'] = getValue(data, 'dailyHourGoal', 8.0);
-      storage['weeklyHourGoal'] = getValue(data, 'weeklyHourGoal', 20.0);
-      storage['goalNotificationsSetting'] = getValue(data, 'goalNotificationsSetting', true);
-      storage['beforeGoalNotificationsSetting'] = getValue(data, 'beforeGoalNotificationsSetting', true);
-      storage['notificationMinutes'] = getValue(data, 'notificationMinutes', 15.0);
-      storage[dateKey] = getValue(data, dateKey, 0.0);
-    }
-  });
-}
-
-//onInstalled - local testing
-//onStartup - actual event
-//chrome.runtime.onStartup.addListener(function() {
-  initializeStorage();
-  calculateWeekHours();
-  //chrome.storage.sync.set({[getDateKey()] : 6});
-//});
+//chrome.storage.sync.set({[getDateKey()] : 8});
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.OnInstalledReason === 'install') {
+    chrome.storage.sync.set({'minTime': 30});
+    chrome.storage.sync.set({'maxTime': 60});
+    chrome.storage.sync.set({'refreshSetting': true});
+    chrome.storage.sync.set({'refreshSoundSetting': true});
+    chrome.storage.sync.set({'refreshSoundVolumeSetting': 100});
+    chrome.storage.sync.set({'refreshTimerSetting': true});
+    chrome.storage.sync.set({'timeoutSoundSetting': true});
+    chrome.storage.sync.set({'timeoutSoundVolumeSetting': 100});
+    chrome.storage.sync.set({'dailyHourDisplaySetting': true});
+    chrome.storage.sync.set({'weeklyHourDisplaySetting': true});
+    chrome.storage.sync.set({'taskWebsiteSetting': false});
+    chrome.storage.sync.set({'taskWebsiteURLSetting': ''});
+    chrome.storage.sync.set({'employeeWebsiteSetting': false});
+    chrome.storage.sync.set({'employeeWebsiteURLSetting': ''});
+    chrome.storage.sync.set({'timesheetWebsiteSetting': false});
+    chrome.storage.sync.set({'timesheetWebsiteURLSetting': ''});
+    chrome.storage.sync.set({'dynamicGoalsSetting': false});
+    chrome.storage.sync.set({'dailyHourGoal': 8.0});
+    chrome.storage.sync.set({'weeklyHourGoal': 20.0});
+    chrome.storage.sync.set({'goalNotificationsSetting': true});
+    chrome.storage.sync.set({'beforeGoalNotificationsSetting': true});
+    chrome.storage.sync.set({'notificationMinutes': 15});
+  }
+});

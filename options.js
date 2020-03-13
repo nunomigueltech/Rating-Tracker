@@ -2,37 +2,37 @@
 
 /**
  * Changes content visible to the user according to the tab ID selected.
- * @param {Integer reflecting tab ID in options menu.} tabIndex 
+ * @param {number} tabIndex Integer reflecting tab ID in options menu.
  */
 function selectTab(tabIndex) {
     //Hide All Tabs
-    document.getElementById('tab1Content').style.display="none";
-    document.getElementById('tab2Content').style.display="none";
-    document.getElementById('tab3Content').style.display="none";
+    document.getElementById('tab1Content').style.display = "none";
+    document.getElementById('tab2Content').style.display = "none";
+    document.getElementById('tab3Content').style.display = "none";
     
     //Show the Selected Tab
-    document.getElementById('tab' + tabIndex + 'Content').style.display="block";  
+    document.getElementById('tab' + tabIndex + 'Content').style.display = "block";
 }
 
-let tab1 = document.getElementById('tab1')
+let tab1 = document.getElementById('tab1');
 tab1.onclick = (element) => {
     selectTab(1);
-}
+};
 
-let tab2 = document.getElementById('tab2')
+let tab2 = document.getElementById('tab2');
 tab2.onclick = (element) => {
     selectTab(2);
-}
+};
 
-let tab3 = document.getElementById('tab3')
+let tab3 = document.getElementById('tab3');
 tab3.onclick = (element) => {
     selectTab(3);
-}
+};
 
 /**
  * Updates the status of min/max refresh time fields. Updated when settings are loaded 
  * and on interaction with the enable/disable refresh radiobuttons.
- * @param {Boolean that disables min/max refresh fields if FALSE} areFieldsDisabled 
+ * @param {boolean} areFieldsDisabled Boolean that disables min/max refresh fields if FALSE
  */
 function updateRefreshFields(areFieldsDisabled) {
     document.getElementById('minTime').disabled = areFieldsDisabled;
@@ -53,15 +53,14 @@ resetButton.onclick = (element) => {
     if (confirm("Are you sure that want to clear ALL extension storage? This includes your settings and your recorded hours.")) {
         chrome.storage.sync.clear();
         window.location.reload();
-        chrome.runtime.sendMessage({status : 'reset-storage'}); // tell background script to reset cached settings
     }
 };
 
 /**
  * Updates the Hour View in the options menu.
- * @param {Date object to be used for each operation.} dateObject 
- * @param {Integer that should be initialized to 0. Used as accumulator for recursion.} dayCounter 
- * @param {Float that tracks the minutes worked throughout the week. Initialized to 0.0} minutes 
+ * @param {Object} dateObject Date object to be used for each operation.
+ * @param {number} dayCounter Integer that should be initialized to 0. Used as accumulator for recursion.
+ * @param {number} minutes Float that tracks the minutes worked throughout the week. Initialized to 0.0
  */
 function loadWeek(dateObject, dayCounter, minutes) {
     if (dayCounter > 6 || dayCounter < 0) return;
@@ -69,9 +68,9 @@ function loadWeek(dateObject, dayCounter, minutes) {
     let dateEntries = document.getElementById('weeklyView').rows[1].cells;
     let hourEntries = document.getElementById('weeklyView').rows[2].cells;
 
-    var dayString = dateObject.toDateString();
+    let dayString = dateObject.toDateString();
     dateEntries[dayCounter].innerHTML = dayString.substring(4);
-    var dayKey = dateObject.getMonth() + '/' + dateObject.getDate() + '/' + dateObject.getFullYear();
+    let dayKey = dateObject.getMonth() + '/' + dateObject.getDate() + '/' + dateObject.getFullYear();
     chrome.storage.sync.get(dayKey, (data) => {
         let minutesWorked = (typeof data[dayKey] === 'undefined')? 0.0 : parseInt(data[dayKey]);
         let hoursWorked = minutesWorked/60.0;
@@ -95,12 +94,12 @@ function loadWeek(dateObject, dayCounter, minutes) {
 
 let weekOffset = 0;
 function loadHourView() {
-    var date = new Date();
+    let date = new Date();
 
     // move date to the beginning of the week
     date.setDate(date.getDate() - date.getDay() + (weekOffset * 7));
     loadWeek(date, 0, 0.0);
-};
+}
 
 let previousWeekButton = document.getElementById('prevWeekButton');
 previousWeekButton.onclick = (element) => {
@@ -162,12 +161,12 @@ chrome.runtime.onMessage.addListener(
 
 /**
  * Reads value from the object literal and sets a default value if it was undefined.
- * @param {Object literal to read data from.} data 
- * @param {String containing the key to access data to verify.} key 
- * @param {Variable that contains a back-up value for undefined entries.} defaultValue 
+ * @param {Object} data Object literal to read data from.
+ * @param {string} key String containing the key to access data to verify.
+ * @param {*} defaultValue Variable that contains a back-up value for undefined entries.
  */
 function getValue(data, key, defaultValue) {
-    let result = data[key]
+    let result = data[key];
     if (typeof result === 'undefined') {
         result = defaultValue;
         chrome.storage.sync.set({[key] : result});
@@ -179,11 +178,11 @@ function getValue(data, key, defaultValue) {
 /**
  * Updates field values such that the min value is always smaller than the max and the
  * value of each field does not go below a certain value.
- * @param {Float containing the minimum value allowed on text fields.} minValue 
- * @param {Float representing the min. value we are testing.} minVariable 
- * @param {Float representing the max. value we are testing.} maxVariable 
- * @param {String containing the ID of the min. value field.} minElementID 
- * @param {String containing the ID of the max. value field.} maxElementID 
+ * @param {number} minValue Float containing the minimum value allowed on text fields.
+ * @param {number} minVariable Float representing the min. value we are testing.
+ * @param {number} maxVariable Float representing the max. value we are testing.
+ * @param {string} minElementID String containing the ID of the min. value field.
+ * @param {string} maxElementID String containing the ID of the max. value field.
  */
 function updateMinMaxFields(minValue, minVariable, maxVariable, minElementID, maxElementID) {
     if (minVariable < minValue) {
@@ -328,7 +327,7 @@ saveButton.onclick = function(element) {
     let savedLabel = document.getElementById('save-confirmation');
     savedLabel.style.opacity = '1';
     window.setTimeout(fadeoutSavedLabel, 3000);
-}
+};
 
 loadSettings();
 loadHourView();

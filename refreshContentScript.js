@@ -3,34 +3,52 @@
 */
 function checkWork() {
     let taskListText = document.querySelector('div.container').innerText;
-    if (taskListText.includes('Acquire if available') || taskListText.includes('Incomplete Tasks')) {
-        chrome.runtime.sendMessage({status : 'work-available'});
-    } else {
-        chrome.runtime.sendMessage({status : 'work-unavailable'});
-    }
+
+    return (taskListText.includes('Acquire if available') || taskListText.includes('Incomplete Tasks'))
 }
 
-function handleRefresh() {
-    window.location.reload();
-    checkWork();
+function playWorkAlert() {
+    chrome.storage.sync.get(['refreshSoundSetting', 'refreshSoundVolumeSetting'], (settings) => {
+        let soundEnabled = settings['refreshSoundSetting'];
+
+        if (soundEnabled) {
+            let taskURL = chrome.runtime.getURL('sounds/taskaccept1.mp3');
+            let taskSound = new Audio(taskURL);
+            taskSound.volume = parseInt(settings['refreshSoundVolumeSetting']) / 100.0;
+            taskSound.addEventListener('canplaythrough', event => {
+                taskSound.play();
+            });
+        }
+    });
 }
 
-checkWork();
-chrome.runtime.sendMessage({status : 'return-refresh-status'}, (response) => { 
-    let refreshStatus = response.value;
+function loadRefreshTimer() {
+    chrome.storage.sync.get(['refreshSetting', 'minTime', 'maxTime', 'refreshTimerSetting'], (settings) => {
+        let refreshEnabled = settings['refreshSetting'];
 
-    if (refreshStatus) {
-        chrome.runtime.sendMessage({status : 'return-time-interval'}, (response) => {
-            let refreshEnabled = response.value[0];
+        if (refreshEnabled) {
+            let minTime = settings['minTime'];
+            let maxTime = settings['maxTime'];
 
-            if (refreshEnabled) {
-                let minTime = parseInt(response.value[1]);
-                let maxTime = parseInt(response.value[2]);
-            
-                let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
-                setTimeout(handleRefresh, waitTime * 1000);
-                chrome.runtime.sendMessage({status : 'refresh-timer', time : waitTime});
+            let waitTime = Math.ceil( (Math.random() * (maxTime - minTime)) + minTime + 1);
+            setTimeout(() => {window.location.reload()}, waitTime * 1000);
+
+            // check if timer should be displayed in the extension icon
+            if (settings['refreshTimerSetting']) {
+                chrome.runtime.sendMessage({status : 'refresh-timer', time: waitTime}); // notify background script to display refresh timer
             }
-        });
+        }
+    });
+}
+
+function initialize() {
+    let workAvailable = checkWork();
+
+    if (workAvailable) {
+        playWorkAlert();
+    } else {
+        loadRefreshTimer();
     }
-});
+}
+
+initialize();
