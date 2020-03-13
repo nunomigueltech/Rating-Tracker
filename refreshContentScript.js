@@ -1,10 +1,16 @@
 /*
  *Checks the web-page for work and sends message to the background script with its result.
 */
-function checkWork() {
+function workIsAvailable() {
     let taskListText = document.querySelector('div.container').innerText;
 
     return (taskListText.includes('Acquire if available') || taskListText.includes('Incomplete Tasks'))
+}
+
+function weeklyHoursCompleted() {
+    let taskListText = document.querySelector('div.container').innerText;
+
+    return (taskListText.includes('No tasks are currently available. Please try again after'))
 }
 
 function playWorkAlert() {
@@ -42,9 +48,9 @@ function loadRefreshTimer() {
 }
 
 function initialize() {
-    let workAvailable = checkWork();
+    if (weeklyHoursCompleted()) return;
 
-    if (workAvailable) {
+    if (workIsAvailable()) {
         playWorkAlert();
     } else {
         loadRefreshTimer();
