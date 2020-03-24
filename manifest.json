@@ -1,8 +1,8 @@
 {
   "name": "Rating Tracker",
   "version": "1.0",
-  "description": "Refreshes Lionbridge task pages in search of work.",
-  "permissions": ["webNavigation", "storage", "tabs", "notifications"],
+  "description": "Automatically tracks work hours completed by Lionbridge raters.",
+  "permissions": ["storage", "notifications"],
   "web_accessible_resources": [
     "images/*.png",
     "sounds/*"
