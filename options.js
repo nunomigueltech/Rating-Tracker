@@ -211,7 +211,8 @@ function loadSettings() {
                              'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting',
                              'dynamicGoalsSetting', 'dailyHourGoal', 'weeklyHourGoal',
                              'beforeGoalNotificationsSetting', 'notificationMinutes',
-                             'goalNotificationsSetting'] , function(data) { 
+                             'goalNotificationsSetting', 'updateNotificationsSetting'] ,
+                    function(data) {
 
         let minTime = getValue(data, 'minTime', 30);
         let maxTime = getValue(data, 'maxTime', 60);
@@ -235,6 +236,7 @@ function loadSettings() {
         let goalNotificationsEnabled = getValue(data, 'goalNotificationsSetting', true);
         let beforeGoalNotificationsEnabled = getValue(data, 'beforeGoalNotificationsSetting', true);
         let notificationMinutes = getValue(data, 'notificationMinutes', 15);
+        let updateNotificationsEnabled = getValue(data, 'updateNotificationsSetting', true);
 
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
@@ -263,6 +265,7 @@ function loadSettings() {
         document.getElementById('beforeGoalNotificationsEnabled').checked = beforeGoalNotificationsEnabled;
         document.getElementById('notificationMinutes').value = notificationMinutes;
         document.getElementById('notificationMinutes').disabled = !beforeGoalNotificationsEnabled;
+        document.getElementById('updateNotificationsEnabled').checked = updateNotificationsEnabled;
         updateRefreshFields(!refreshEnabled);
     });
 }
@@ -291,6 +294,7 @@ saveButton.onclick = function(element) {
     let goalNotificationsSetting = document.getElementById('goalNotificationsEnabled').checked;
     let beforeGoalNotificationsSetting = document.getElementById('beforeGoalNotificationsEnabled').checked;
     let notificationMinutes = parseInt(document.getElementById('notificationMinutes').value);
+    let updateNotificationsSetting = document.getElementById('updateNotificationsEnabled').checked;
 
     updateMinMaxFields(1, minTime, maxTime, 'minTime', 'maxTime');
     updateMinMaxFields(1, dailyHourGoal, weeklyHourGoal, 'dailyHourGoal', 'weeklyHourGoal');
@@ -322,6 +326,7 @@ saveButton.onclick = function(element) {
     chrome.storage.sync.set({'goalNotificationsSetting' : goalNotificationsSetting});
     chrome.storage.sync.set({'beforeGoalNotificationsSetting' : beforeGoalNotificationsSetting});
     chrome.storage.sync.set({'notificationMinutes' : notificationMinutes});
+    chrome.storage.sync.set({'updateNotificationsSetting' : updateNotificationsSetting});
 
     // update save notification
     let savedLabel = document.getElementById('save-confirmation');
