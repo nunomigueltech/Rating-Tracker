@@ -1,3 +1,8 @@
+/*
+    INTERNAL VERSION
+ */
+const extension_version = "1.1.0";
+
 let settingsButton = document.getElementById('openSettings');
 settingsButton.onclick = function() {
     chrome.runtime.openOptionsPage();
@@ -19,6 +24,19 @@ let timesheetWebsiteURL = '';
 let timesheetWebsiteButton = document.getElementById('openTimesheetWebsite');
 timesheetWebsiteButton.onclick = function() {
     chrome.tabs.create({url: timesheetWebsiteURL})
+};
+
+let updateButton = document.getElementById('updateText');
+updateButton.onclick = function() {
+    let updatePageURL = chrome.extension.getURL('update.html');
+    chrome.tabs.create({url: updatePageURL});
+    chrome.storage.local.set({'localExtensionVersion' : extension_version});
+};
+
+let hideUpdateButton = document.getElementById('updateCloseImg');
+hideUpdateButton.onclick = function() {
+    hideElement('updateNotification', false);
+    chrome.storage.local.set({'localExtensionVersion' : extension_version});
 };
 
 /**
@@ -133,48 +151,59 @@ function initialize() {
             }
         }
 
-        let dateKey = getDateKey();
-        chrome.storage.sync.get([dateKey, 'dailyHourDisplaySetting', 'weeklyHourDisplaySetting',
-                                'dynamicGoalsSetting', 'taskWebsiteSetting', 'taskWebsiteURLSetting',
-                                'taskWebsiteSetting', 'taskWebsiteURLSetting', 'employeeWebsiteSetting',
-                                'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting', 'dailyHourGoal',
-                                'weeklyHourGoal'], function(data) {
-            let minutesWorkedToday = getValue(data, dateKey, 0.0);
-            let hoursWorkedToday = minutesWorkedToday / 60.0;
+        chrome.storage.local.get(['localExtensionVersion'], function(data) {
+            let localExtensionVersion = data['localExtensionVersion'];
+            let dateKey = getDateKey();
+            chrome.storage.sync.get([dateKey, 'dailyHourDisplaySetting', 'weeklyHourDisplaySetting',
+                'dynamicGoalsSetting', 'taskWebsiteSetting', 'taskWebsiteURLSetting',
+                'taskWebsiteSetting', 'taskWebsiteURLSetting', 'employeeWebsiteSetting',
+                'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting', 'dailyHourGoal',
+                'weeklyHourGoal', 'updateNotificationsSetting'], function(data) {
+                let minutesWorkedToday = getValue(data, dateKey, 0.0);
+                let hoursWorkedToday = minutesWorkedToday / 60.0;
 
-            let hoursWorkedWeek = minutesWorkedWeek / 60.0;
+                let hoursWorkedWeek = minutesWorkedWeek / 60.0;
 
-            let displayDailyHoursEnabled = getValue(data, 'dailyHourDisplaySetting', true);
-            let displayWeeklyHoursEnabled = getValue(data, 'weeklyHourDisplaySetting', true);
-            let dynamicGoalsEnabled = getValue(data, 'dynamicGoalsSetting', false);
+                let displayDailyHoursEnabled = getValue(data, 'dailyHourDisplaySetting', true);
+                let displayWeeklyHoursEnabled = getValue(data, 'weeklyHourDisplaySetting', true);
+                let dynamicGoalsEnabled = getValue(data, 'dynamicGoalsSetting', false);
 
-            let taskWebsiteButtonEnabled = getValue(data, 'taskWebsiteSetting', false);
-            taskWebsiteURL = getValue(data, 'taskWebsiteURLSetting', '');
+                let taskWebsiteButtonEnabled = getValue(data, 'taskWebsiteSetting', false);
+                taskWebsiteURL = getValue(data, 'taskWebsiteURLSetting', '');
 
-            let employeeWebsiteButtonEnabled = getValue(data, 'employeeWebsiteSetting', false);
-            employeeWebsiteURL = getValue(data, 'employeeWebsiteURLSetting', '');
+                let employeeWebsiteButtonEnabled = getValue(data, 'employeeWebsiteSetting', false);
+                employeeWebsiteURL = getValue(data, 'employeeWebsiteURLSetting', '');
 
-            let timesheetWebsiteButtonEnabled = getValue(data, 'timesheetWebsiteSetting', false);
-            timesheetWebsiteURL = getValue(data, 'timesheetWebsiteURLSetting', '');
+                let timesheetWebsiteButtonEnabled = getValue(data, 'timesheetWebsiteSetting', false);
+                timesheetWebsiteURL = getValue(data, 'timesheetWebsiteURLSetting', '');
 
-            let dailyHourGoal = getValue(data, 'dailyHourGoal', 8.0);
-            let weeklyHourGoal = getValue(data, 'weeklyHourGoal', 20.0);
+                let dailyHourGoal = getValue(data, 'dailyHourGoal', 8.0);
+                let weeklyHourGoal = getValue(data, 'weeklyHourGoal', 20.0);
 
-            updateGoalText(displayDailyHoursEnabled, 'hoursWorkedToday', ' hours today',
-                hoursWorkedToday, dailyHourGoal, dynamicGoalsEnabled);
+                updateGoalText(displayDailyHoursEnabled, 'hoursWorkedToday', ' hours today',
+                    hoursWorkedToday, dailyHourGoal, dynamicGoalsEnabled);
 
-            updateGoalText(displayWeeklyHoursEnabled, 'hoursWorkedWeek', ' hours this week',
-                hoursWorkedWeek, weeklyHourGoal, dynamicGoalsEnabled);
+                updateGoalText(displayWeeklyHoursEnabled, 'hoursWorkedWeek', ' hours this week',
+                    hoursWorkedWeek, weeklyHourGoal, dynamicGoalsEnabled);
 
-            hideElement('taskWebsiteButton', taskWebsiteButtonEnabled);
-            hideElement('openEmployeeWebsite', employeeWebsiteButtonEnabled);
-            hideElement('openTimesheetWebsite', timesheetWebsiteButtonEnabled);
+                hideElement('taskWebsiteButton', taskWebsiteButtonEnabled);
+                hideElement('openEmployeeWebsite', employeeWebsiteButtonEnabled);
+                hideElement('openTimesheetWebsite', timesheetWebsiteButtonEnabled);
 
-            let additionalButtonsEnabled = employeeWebsiteButtonEnabled || timesheetWebsiteButtonEnabled;
-            hideElement('additionalSiteButtons', additionalButtonsEnabled);
+                let additionalButtonsEnabled = employeeWebsiteButtonEnabled || timesheetWebsiteButtonEnabled;
+                hideElement('additionalSiteButtons', additionalButtonsEnabled);
 
-            let buttonDividerEnabled = taskWebsiteButtonEnabled || additionalButtonsEnabled;
-            hideElement('buttonDivider', buttonDividerEnabled);
+                let isUpToDate = extension_version === localExtensionVersion;
+                let updateNotificationsEnabled = getValue(data, 'updateNotificationsSetting', true);
+                hideElement('updateNotification', updateNotificationsEnabled && !isUpToDate);
+                if (updateNotificationsEnabled && !isUpToDate) {
+                    let updateText = document.getElementById('updateText');
+                    updateText.innerText = "What's New in Version "  + extension_version;
+                }
+
+                let buttonDividerEnabled = taskWebsiteButtonEnabled || additionalButtonsEnabled;
+                hideElement('buttonDivider', buttonDividerEnabled);
+            });
         });
     });
 }

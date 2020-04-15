@@ -54,12 +54,28 @@
       #openEmployeeWebsite:hover, #openTimesheetWebsite:hover {
         width: 27px;
       }
+      #updateNotification {
+        display: flex;
+        margin-bottom: 5px;
+        overflow: auto;
+        justify-content: center;
+        align-items: center;
+        height: 22px;
+        text-decoration-color: #1e2022;
+      }
+      #updateNotification:hover {
+        background-color: rgb(164, 214, 228);
+        border-radius: 20px;
+        cursor: pointer;
+        height: 22px;
+      }
+      #updateCloseImg {
+        margin-left: 5px;
+      }
     </style>
   </head>
   <body>
     <div id="content">
-      
-      
       <div id="taskWebsiteButton"><button id="openTaskWebsite" type="button">Go to Task Website</button>
       </div>  
       <div id="additionalSiteButtons">
@@ -67,6 +83,10 @@
         <input type="image" src="images/calendar.png" id="openTimesheetWebsite"/>
       </div>
       <div id="buttonDivider"><br></div>
+      <div id="updateNotification">
+        <h4 id="updateText">Checking for new update...</h4>
+        <img id="updateCloseImg" src="images/close.png" height="14" width="14">
+      </div>
       <h3 id ="hoursWorkedToday">0.0 / 8.0 hours today</h3>
       <h4 id ="hoursWorkedWeek">0.0 / 20.0 hours this week</h4>
       <br>
