@@ -40,9 +40,16 @@ const refreshTimer = {
 
   clear() {
     window.clearInterval(refreshTimer.interval);
-    chrome.browserAction.setBadgeText({text: ''});
+    clearBadgeText();
   }
 };
+
+/**
+ * Clears the text displayed on the extension badge
+ */
+function clearBadgeText() {
+  chrome.browserAction.setBadgeText({text: ''});
+}
 
 /**
  * Returns a string that can be used to lookup work data from a particular day.
@@ -126,6 +133,7 @@ chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     switch(request.status) {
       case 'cancel-task':
+        clearBadgeText();
         chrome.storage.local.get('taskActive', (status) => {
           if (status['taskActive']) {
             chrome.storage.local.set({'taskID': -1, 'taskTimestamp': null, 'taskTime': 0, 'taskActive': false});
@@ -135,6 +143,7 @@ chrome.runtime.onMessage.addListener(
 
       case 'submit-task':
         console.log("Task submitted");
+        clearBadgeText();
         chrome.storage.local.get('taskActive', (status) => {
           if (status['taskActive']) {
             submitHours();
@@ -146,6 +155,10 @@ chrome.runtime.onMessage.addListener(
       case 'refresh-timer':
         refreshTimer.clear();
         refreshTimer.start(request.time);
+        break;
+
+      case 'reached-aet':
+        chrome.browserAction.setBadgeText({text: 'DONE'});
         break;
     }
   }

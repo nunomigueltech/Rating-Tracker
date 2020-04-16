@@ -30,6 +30,13 @@ function taskTimeout(soundVolume) {
     sound.addEventListener("canplaythrough", event => {
         sound.play();
     });
+
+    chrome.storage.local.get('taskCompletionNotificationsSetting', (setting) => {
+        let notificationEnabled = setting['taskCompletionNotificationsSetting'];
+        if (notificationEnabled) {
+            chrome.runtime.sendMessage({status : "reached-aet"});
+        }
+    });
 }
 
 let submitButton = document.querySelector('button#ewok-task-submit-button');
