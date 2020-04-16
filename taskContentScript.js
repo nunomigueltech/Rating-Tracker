@@ -31,8 +31,9 @@ function taskTimeout(soundVolume) {
         sound.play();
     });
 
-    chrome.storage.local.get('taskCompletionNotificationsSetting', (setting) => {
+    chrome.storage.sync.get('taskCompletionNotificationsSetting', (setting) => {
         let notificationEnabled = setting['taskCompletionNotificationsSetting'];
+
         if (notificationEnabled) {
             chrome.runtime.sendMessage({status : "reached-aet"});
         }

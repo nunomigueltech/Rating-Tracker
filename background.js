@@ -158,7 +158,7 @@ chrome.runtime.onMessage.addListener(
         break;
 
       case 'reached-aet':
-        chrome.browserAction.setBadgeText({text: 'DONE'});
+        chrome.browserAction.setBadgeText({text: 'FIN'});
         break;
     }
   }
