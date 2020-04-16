@@ -9,6 +9,7 @@ function selectTab(tabIndex) {
     document.getElementById('tab1Content').style.display = "none";
     document.getElementById('tab2Content').style.display = "none";
     document.getElementById('tab3Content').style.display = "none";
+    document.getElementById('tab4Content').style.display = "none";
     
     //Show the Selected Tab
     document.getElementById('tab' + tabIndex + 'Content').style.display = "block";
@@ -28,6 +29,36 @@ let tab3 = document.getElementById('tab3');
 tab3.onclick = (element) => {
     selectTab(3);
 };
+
+let tab4 = document.getElementById('tab4');
+tab4.onclick = (element) => {
+    selectTab(4);
+};
+
+/**
+ * START OF CHANGELOG HANDLER
+ */
+
+let changelogVersionSelector = document.getElementById('versionSelect');
+changelogVersionSelector.onchange = (event) => {
+    let selectedVersionID = changelogVersionSelector.value;
+
+    let availableVersions = changelogVersionSelector.options;
+    for (let version of availableVersions) {
+        let internalVersionID = version.value;
+
+        if (selectedVersionID !== internalVersionID) {
+            document.getElementById(internalVersionID).style.display = 'none';
+        } else {
+            document.getElementById('changelogVersion').innerText = 'Version ' + version.innerText + ' Changelog';
+            document.getElementById(internalVersionID).style.display = 'block';
+        }
+    }
+};
+
+/**
+ * END OF CHANGELOG HANDLER
+ */
 
 /**
  * Updates the status of min/max refresh time fields. Updated when settings are loaded 

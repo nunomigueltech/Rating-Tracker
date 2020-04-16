@@ -16,7 +16,7 @@
             border-style: solid;
             max-width: 1200px;
             min-width: 1200px;
-            height: 400px;
+            height: 700px;
             margin: 0 auto;
             background-color: #f0f5f9;
             border-color: #52616b;
@@ -26,7 +26,7 @@
             padding: 10px;
         }
 
-        #tab1, #tab2, #tab3 {
+        #tab1, #tab2, #tab3, #tab4 {
             float: left;
             padding: 5px 50px 5px 50px;
             background: #52616b;
@@ -36,11 +36,11 @@
             border-radius: 2px;
         }
 
-        #tab1:hover, #tab2:hover, #tab3:hover {
+        #tab1:hover, #tab2:hover, #tab3:hover, #tab4:hover {
         background: #c9d6df;
         }
 
-        #tab1Content, #tab2Content, #tab3Content {
+        #tab1Content, #tab2Content, #tab3Content, #tab4Content {
             width: 1100px;
             height: 700px;
             padding: 20px;
@@ -53,7 +53,7 @@
         display: block; 
         }
 
-        #tab2Content, #tab3Content {
+        #tab2Content, #tab3Content, #tab4Content {
             display: none; 
         }
 
@@ -141,6 +141,10 @@
         .numberFields {
             width: 50px;
         }
+
+        .oldVersion {
+            display: none;
+        }
     </style>
   </head>
   <body>
@@ -150,7 +154,8 @@
             <div id="inner-content">
                 <div id="tab1">General</div>
                 <div id="tab2">Hour View</div>
-                <div id="tab3">About</div>
+                <div id="tab3">Changelog</div>
+                <div id="tab4">About</div>
                 <br/>
 
                 <div id="tab1Content">
@@ -315,6 +320,90 @@
                 </div>
 
                 <div id="tab3Content">
+                    Select a version:
+                    <select id="versionSelect">
+                        <option value="version_1_1_0">1.1.0</option>
+                        <option value="version_1_0_0">1.0.0</option>
+                    </select>
+                    <div id="changelogContent">
+                        <h2 id="changelogVersion">Version 1.1.0 Changelog</h2>
+                        <div id="version_1_1_0" class="latestVersion">
+                            <h1>What's New</h1>
+                            <p>For this update, changes were made to allow Rating Tracker to evolve beyond its simple beginnings.
+                                There are some exciting ideas floating about that will eventually make their way to YOU, but there
+                                are a list of chores that must be completed to get there. There's a particular focus on ensuring
+                                the foundation being built upon is truly sturdy enough to handle the adventures being planned
+                                into the future. Simplicity and usability are the pillars of this project. It works right out of the
+                                box and doesn't cause you any grief after an update; and I'm proud to say that this extension is more
+                                secure and user-friendly than before. </p>
+                            <h4>Fresh Additions</h4>
+                            <ul>
+                                <li>Update Notifications - like this one!
+                                    <p>
+                                        Whenever an update is published, users will be notified of its changes. There was a
+                                        particular focus on making this unintrusive. Some browser extensions have a habit of flashing
+                                        their update news in your face. Rather than taking a flashy approach, the new update
+                                        notifications are entirely optional. You can even disable them, if you'd like.
+                                    </p>
+                                </li>
+                                <li>Changelogs
+                                    <p>
+                                        All extension changes are now available through a changelog in the options page. This
+                                        has been designed for both utility and readability. You may browse through all previous
+                                        (and current) releases to see how the project has evolved over time.
+                                    </p>
+                                </li>
+                                <li>Task completion notification
+                                    <p>
+                                        When a task reaches the AET, the text on the extension icon will display 'DONE'. This is
+                                        meant to help users missing the audio notifications and can be enabled/disabled through
+                                        the settings page.
+                                    </p>
+                                </li>
+                            </ul>
+
+                            <h4>Changes for the Ages</h4>
+                            <ul>
+                                <li>Improved extension security
+                                    <p>
+                                        It is my belief that being proactive leads to great innovation. Several enhancements
+                                        have been identified that will allow Rating Tracker to be more robust in the event that
+                                        it encounters problems while tracking your work hours. It's better to be safe than sorry,
+                                        and now you can rest assured that Rating Tracker will notify you in the event that it
+                                        encounters problems while doing its job.
+                                    </p>
+                                </li>
+                                <li>Improved timekeeping accuracy
+                                    <p>
+                                        When delays are encountered on the work website it's common to see a great disparity
+                                        between the internal Lionbridge timer (that can be enabled through the website settings
+                                        page) and the internal Rating Tracker timer. New measures have been introduced with
+                                        version 1.1.0 that should reduce this problem.
+                                    </p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="version_1_0_0" class="oldVersion">
+                            <p>
+                                The initial release of Rating Tracker came with a single goal: to facilitate the most
+                            tedious (but critical) aspect of working for Lionbridge. There are many opportunities to
+                            introduce errors while manually tracking work hours. With Rating Tracker, these errors
+                            become a thing of the past. Save time and make more money in the process with the latest
+                            productivity tool coming to the Google Chrome store.
+                            </p>
+                            <h3>Fundamental Properties of Rating Tracker</h3>
+                            <ul>
+                                <li>Easy to use! It works as you expect it.</li>
+                                <li>Easy to customize to YOUR needs.</li>
+                                <li>Unintrusive practices: the focus is on your needs.</li>
+                                <li>Lean design with a focus on speed.</li>
+                                <li>Respects the Terms of Service and privacy requirements laid out by Lionbridge.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab4Content">
                     <p>This extension abides by Lionbridge's Terms of Service and privacy requirements.
                         The only information that it stores about your work sessions is the time that you 
                         spend on the job site. It is written to support Chrome Sync, so your extension settings 
