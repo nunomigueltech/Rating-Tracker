@@ -242,7 +242,8 @@ function loadSettings() {
                              'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting',
                              'dynamicGoalsSetting', 'dailyHourGoal', 'weeklyHourGoal',
                              'beforeGoalNotificationsSetting', 'notificationMinutes',
-                             'goalNotificationsSetting', 'updateNotificationsSetting'] ,
+                             'goalNotificationsSetting', 'updateNotificationsSetting',
+                             'taskCompletionNotificationsSetting'] ,
                     function(data) {
 
         let minTime = getValue(data, 'minTime', 30);
@@ -268,6 +269,7 @@ function loadSettings() {
         let beforeGoalNotificationsEnabled = getValue(data, 'beforeGoalNotificationsSetting', true);
         let notificationMinutes = getValue(data, 'notificationMinutes', 15);
         let updateNotificationsEnabled = getValue(data, 'updateNotificationsSetting', true);
+        let taskCompletionNotificationsEnabled = getValue(data, 'taskCompletionNotificationsSetting', true);
 
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
@@ -297,6 +299,7 @@ function loadSettings() {
         document.getElementById('notificationMinutes').value = notificationMinutes;
         document.getElementById('notificationMinutes').disabled = !beforeGoalNotificationsEnabled;
         document.getElementById('updateNotificationsEnabled').checked = updateNotificationsEnabled;
+        document.getElementById('taskCompletionNotificationsEnabled').checked = taskCompletionNotificationsEnabled;
         updateRefreshFields(!refreshEnabled);
     });
 }
@@ -326,6 +329,7 @@ saveButton.onclick = function(element) {
     let beforeGoalNotificationsSetting = document.getElementById('beforeGoalNotificationsEnabled').checked;
     let notificationMinutes = parseInt(document.getElementById('notificationMinutes').value);
     let updateNotificationsSetting = document.getElementById('updateNotificationsEnabled').checked;
+    let taskCompletionNotificationsSetting = document.getElementById('taskCompletionNotificationsEnabled').checked;
 
     updateMinMaxFields(1, minTime, maxTime, 'minTime', 'maxTime');
     updateMinMaxFields(1, dailyHourGoal, weeklyHourGoal, 'dailyHourGoal', 'weeklyHourGoal');
@@ -335,29 +339,17 @@ saveButton.onclick = function(element) {
         document.getElementById('notificationMinutes').value = 0;
     }
 
-    chrome.storage.sync.set({'minTime' : minTime});
-    chrome.storage.sync.set({'maxTime' : maxTime});
-    chrome.storage.sync.set({'refreshSetting' : refreshSetting});
-    chrome.storage.sync.set({'refreshSoundSetting' : refreshSoundSetting});
-    chrome.storage.sync.set({'refreshSoundVolumeSetting' : refreshSoundVolumeSetting});
-    chrome.storage.sync.set({'refreshTimerSetting' : refreshTimerSetting});
-    chrome.storage.sync.set({'timeoutSoundSetting' : timeoutSoundSetting});
-    chrome.storage.sync.set({'timeoutSoundVolumeSetting' : timeoutSoundVolumeSetting});
-    chrome.storage.sync.set({'dailyHourDisplaySetting' : dailyHourDisplaySetting});
-    chrome.storage.sync.set({'weeklyHourDisplaySetting' : weeklyHourDisplaySetting});
-    chrome.storage.sync.set({'taskWebsiteSetting' : taskWebsiteSetting});
-    chrome.storage.sync.set({'taskWebsiteURLSetting' : taskWebsiteURLSetting});
-    chrome.storage.sync.set({'employeeWebsiteSetting' : employeeWebsiteSetting});
-    chrome.storage.sync.set({'employeeWebsiteURLSetting' : employeeWebsiteURLSetting});
-    chrome.storage.sync.set({'timesheetWebsiteSetting' : timesheetWebsiteSetting});
-    chrome.storage.sync.set({'timesheetWebsiteURLSetting' : timesheetWebsiteURLSetting});
-    chrome.storage.sync.set({'dynamicGoalsSetting' : dynamicGoalsSetting});
-    chrome.storage.sync.set({'dailyHourGoal' : dailyHourGoal});
-    chrome.storage.sync.set({'weeklyHourGoal' : weeklyHourGoal});
-    chrome.storage.sync.set({'goalNotificationsSetting' : goalNotificationsSetting});
-    chrome.storage.sync.set({'beforeGoalNotificationsSetting' : beforeGoalNotificationsSetting});
-    chrome.storage.sync.set({'notificationMinutes' : notificationMinutes});
-    chrome.storage.sync.set({'updateNotificationsSetting' : updateNotificationsSetting});
+    chrome.storage.sync.set({'minTime': minTime, 'maxTime': maxTime, 'refreshSetting': refreshSetting,
+                            'refreshSoundSetting': refreshSoundSetting, 'refreshSoundVolumeSetting': refreshSoundVolumeSetting,
+                            'refreshTimerSetting': refreshTimerSetting, 'timeoutSoundSetting': timeoutSoundSetting,
+                            'timeoutSoundVolumeSetting': timeoutSoundVolumeSetting, 'dailyHourDisplaySetting': dailyHourDisplaySetting,
+                            'weeklyHourDisplaySetting': weeklyHourDisplaySetting, 'taskWebsiteSetting': taskWebsiteSetting,
+                            'taskWebsiteURLSetting': taskWebsiteURLSetting, 'employeeWebsiteSetting': employeeWebsiteSetting,
+                            'employeeWebsiteURLSetting': employeeWebsiteURLSetting, 'timesheetWebsiteSetting': timesheetWebsiteSetting,
+                            'timesheetWebsiteURLSetting': timesheetWebsiteURLSetting, 'dynamicGoalsSetting': dynamicGoalsSetting,
+                            'dailyHourGoal': dailyHourGoal, 'weeklyHourGoal': weeklyHourGoal, 'goalNotificationsSetting': goalNotificationsSetting,
+                            'beforeGoalNotificationsSetting': beforeGoalNotificationsSetting, 'notificationMinutes' : notificationMinutes,
+                            'updateNotificationsSetting': updateNotificationsSetting, 'taskCompletionNotificationsSetting': taskCompletionNotificationsSetting});
 
     // update save notification
     let savedLabel = document.getElementById('save-confirmation');
