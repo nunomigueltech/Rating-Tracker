@@ -263,30 +263,51 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-//chrome.storage.sync.set({[getDateKey()] : 8});
-chrome.runtime.onInstalled.addListener((details) => {
-  if (details.OnInstalledReason === 'install') {
-    chrome.storage.sync.set({'minTime': 30});
-    chrome.storage.sync.set({'maxTime': 60});
-    chrome.storage.sync.set({'refreshSetting': true});
-    chrome.storage.sync.set({'refreshSoundSetting': true});
-    chrome.storage.sync.set({'refreshSoundVolumeSetting': 100});
-    chrome.storage.sync.set({'refreshTimerSetting': true});
-    chrome.storage.sync.set({'timeoutSoundSetting': true});
-    chrome.storage.sync.set({'timeoutSoundVolumeSetting': 100});
-    chrome.storage.sync.set({'dailyHourDisplaySetting': true});
-    chrome.storage.sync.set({'weeklyHourDisplaySetting': true});
-    chrome.storage.sync.set({'taskWebsiteSetting': false});
-    chrome.storage.sync.set({'taskWebsiteURLSetting': ''});
-    chrome.storage.sync.set({'employeeWebsiteSetting': false});
-    chrome.storage.sync.set({'employeeWebsiteURLSetting': ''});
-    chrome.storage.sync.set({'timesheetWebsiteSetting': false});
-    chrome.storage.sync.set({'timesheetWebsiteURLSetting': ''});
-    chrome.storage.sync.set({'dynamicGoalsSetting': false});
-    chrome.storage.sync.set({'dailyHourGoal': 8.0});
-    chrome.storage.sync.set({'weeklyHourGoal': 20.0});
-    chrome.storage.sync.set({'goalNotificationsSetting': true});
-    chrome.storage.sync.set({'beforeGoalNotificationsSetting': true});
-    chrome.storage.sync.set({'notificationMinutes': 15});
-  }
-});
+function verifySettingsIntegrity() {
+  console.log('Verifying settings integrity..')
+  let defaultSettings = new Object();
+  defaultSettings = {
+    'minTime': 30,
+    'maxTime': 60,
+    'refreshSetting': true,
+    'refreshSoundSetting': true,
+    'refreshSoundVolumeSetting': 100,
+    'refreshTimerSetting': true,
+    'timeoutSoundSetting': true,
+    'timeoutSoundVolumeSetting': 100,
+    'dailyHourDisplaySetting': true,
+    'weeklyHourDisplaySetting': true,
+    'taskWebsiteSetting': false,
+    'taskWebsiteURLSetting': '',
+    'employeeWebsiteSetting': false,
+    'employeeWebsiteURLSetting': '',
+    'timesheetWebsiteSetting': false,
+    'timesheetWebsiteURLSetting': '',
+    'dynamicGoalsSetting': false,
+    'dailyHourGoal': 8.0,
+    'weeklyHourGoal': 20.0,
+    'goalNotificationsSetting': true,
+    'beforeGoalNotificationsSetting': true,
+    'notificationMinutes': 15,
+    'updateNotificationsEnabled': true,
+    'taskCompletionNotificationsEnabled': true
+  };
+
+  chrome.storage.sync.get(Object.keys(defaultSettings), (settings) => {
+    let newMappings = new Object();
+    for (const key in settings) {
+      if (typeof key === 'undefined') {
+        // default mapping NOT stored yet
+        newMappings[key] = defaultSettings[key];
+      }
+    }
+
+    // store default mappings
+    if (Object.keys(newMappings).length !== 0) {
+      chrome.storage.sync.set(newMappings);
+    }
+  });
+}
+
+chrome.runtime.onStartup.addListener(verifySettingsIntegrity);
+chrome.runtime.onInstalled.addListener(verifySettingsIntegrity);
