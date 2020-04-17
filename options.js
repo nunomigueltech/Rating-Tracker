@@ -196,11 +196,11 @@ chrome.runtime.onMessage.addListener(
  * @param {string} key String containing the key to access data to verify.
  * @param {*} defaultValue Variable that contains a back-up value for undefined entries.
  */
-function getValue(data, key, defaultValue) {
-    let result = data[key];
-    if (typeof result === 'undefined') {
+function getValue(setting, defaultValue) {
+    let result = setting;
+    if (typeof setting === 'undefined') {
         result = defaultValue;
-        chrome.storage.sync.set({[key] : result});
+        chrome.storage.sync.set({[setting] : result});
     }
 
     return result;
@@ -246,30 +246,30 @@ function loadSettings() {
                              'taskCompletionNotificationsSetting'] ,
                     function(data) {
 
-        let minTime = getValue(data, 'minTime', 30);
-        let maxTime = getValue(data, 'maxTime', 60);
-        let refreshEnabled = getValue(data, 'refreshSetting', true);
-        let refreshSoundEnabled = getValue(data, 'refreshSoundSetting', true);
-        let refreshSoundVolume = getValue(data, 'refreshSoundVolumeSetting', 100);
-        let refreshTimerEnabled = getValue(data, 'refreshTimerSetting', true);
-        let timeoutSoundEnabled = getValue(data, 'timeoutSoundSetting', true);
-        let timeoutSoundVolume = getValue(data, 'timeoutSoundVolumeSetting', 100);
-        let dailyHourDisplayEnabled = getValue(data, 'dailyHourDisplaySetting', true);
-        let weeklyHourDisplayEnabled = getValue(data, 'weeklyHourDisplaySetting', true);
-        let taskWebsiteEnabled = getValue(data, 'taskWebsiteSetting', false);
-        let taskWebsiteURL = getValue(data, 'taskWebsiteURLSetting', '');
-        let employeeWebsiteEnabled = getValue(data, 'employeeWebsiteSetting', false);
-        let employeeWebsiteURL = getValue(data, 'employeeWebsiteURLSetting', '');
-        let timesheetWebsiteEnabled = getValue(data, 'timesheetWebsiteSetting', false);
-        let timesheetWebsiteURL = getValue(data, 'timesheetWebsiteURLSetting', '');
-        let dynamicGoalsEnabled = getValue(data, 'dynamicGoalsSetting', false);
-        let dailyHourGoal = getValue(data, 'dailyHourGoal', 8.0);
-        let weeklyHourGoal = getValue(data, 'weeklyHourGoal', 20.0);
-        let goalNotificationsEnabled = getValue(data, 'goalNotificationsSetting', true);
-        let beforeGoalNotificationsEnabled = getValue(data, 'beforeGoalNotificationsSetting', true);
-        let notificationMinutes = getValue(data, 'notificationMinutes', 15);
-        let updateNotificationsEnabled = getValue(data, 'updateNotificationsSetting', true);
-        let taskCompletionNotificationsEnabled = getValue(data, 'taskCompletionNotificationsSetting', true);
+        let minTime = getValue(data['minTime'], 30);
+        let maxTime = getValue(data['maxTime'], 60);
+        let refreshEnabled = getValue(data['refreshSetting'], true);
+        let refreshSoundEnabled = getValue(data['refreshSoundSetting'], true);
+        let refreshSoundVolume = getValue(data['refreshSoundVolumeSetting'], 100);
+        let refreshTimerEnabled = getValue(data['refreshTimerSetting'], true);
+        let timeoutSoundEnabled = getValue(data['timeoutSoundSetting'], true);
+        let timeoutSoundVolume = getValue(data['timeoutSoundVolumeSetting'], 100);
+        let dailyHourDisplayEnabled = getValue(data['dailyHourDisplaySetting'], true);
+        let weeklyHourDisplayEnabled = getValue(data['weeklyHourDisplaySetting'], true);
+        let taskWebsiteEnabled = getValue(data['taskWebsiteSetting'], false);
+        let taskWebsiteURL = getValue(data['taskWebsiteURLSetting'], '');
+        let employeeWebsiteEnabled = getValue(data['employeeWebsiteSetting'], false);
+        let employeeWebsiteURL = getValue(data['employeeWebsiteURLSetting'], '');
+        let timesheetWebsiteEnabled = getValue(data['timesheetWebsiteSetting'], false);
+        let timesheetWebsiteURL = getValue(data['timesheetWebsiteURLSetting'], '');
+        let dynamicGoalsEnabled = getValue(data['dynamicGoalsSetting'], false);
+        let dailyHourGoal = getValue(data['dailyHourGoal'], 8.0);
+        let weeklyHourGoal = getValue(data['weeklyHourGoal'], 20.0);
+        let goalNotificationsEnabled = getValue(data['goalNotificationsSetting'], true);
+        let beforeGoalNotificationsEnabled = getValue(data['beforeGoalNotificationsSetting'], true);
+        let notificationMinutes = getValue(data['notificationMinutes'], 15);
+        let updateNotificationsEnabled = getValue(data['updateNotificationsSetting'], true);
+        let taskCompletionNotificationsEnabled = getValue(data['taskCompletionNotificationsSetting'], true);
 
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
