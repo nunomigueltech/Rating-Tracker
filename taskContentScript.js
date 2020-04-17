@@ -5,7 +5,7 @@ function getTaskTime() {
     let element = document.querySelector('span.ewok-estimated-task-weight');
 
     let contentStrings = element.innerText.split(" ");
-    return parseFloat(contentStrings[0]);
+    return Number(contentStrings[0]);
 }
 
 /**
@@ -13,7 +13,11 @@ function getTaskTime() {
  */
 function getTaskID() {
     let taskID = document.URL.split('=');
-    return taskID[1];
+    if (taskID.length >= 2) {
+        return taskID[1];
+    } else {
+        return null;
+    }
 }
 
 /**
@@ -96,6 +100,17 @@ function initialize() {
     chrome.storage.local.get(['taskID', 'taskTimestamp'], (task) => {
         let internalTaskID = task['taskID'];
         let pageTaskID = getTaskID();
+        let pageTaskTime = getTaskTime();
+
+        if (pageTaskID === null || pageTaskID === '') {
+            alert('Strange! There was an error while Rating Tracker was trying to find the id for the current task. You can email nrodriguesdev@gmail.com to get this resolved.');
+            return;
+        }
+
+        if (!Number.isFinite(pageTaskTime) || pageTaskTime.valueOf() <= 0) {
+            alert('There was an error while Rating Tracker was trying to find the AET for the current task. This is highly unusual. You can email nrodriguesdev@gmail.com to get this resolved.');
+            return;
+        }
 
         if (internalTaskID != pageTaskID) {
             console.log('Tracking new task (ID:' + pageTaskID + ')');
