@@ -84,6 +84,7 @@ resetButton.onclick = (element) => {
     if (confirm("Are you sure that want to clear ALL extension storage? This includes your settings and your recorded hours.")) {
         chrome.storage.sync.clear();
         window.location.reload();
+        chrome.runtime.sendMessage({status : "verify-settings"});
     }
 };
 
@@ -304,8 +305,7 @@ function loadSettings() {
     });
 }
 
-let saveButton = document.getElementById('saveSettings');
-saveButton.onclick = function(element) {
+function saveSettings() {
     let minTime = parseInt(document.getElementById('minTime').value);
     let maxTime = parseInt(document.getElementById('maxTime').value);
     let refreshSetting = document.getElementById('refreshEnabled').checked;
@@ -340,16 +340,21 @@ saveButton.onclick = function(element) {
     }
 
     chrome.storage.sync.set({'minTime': minTime, 'maxTime': maxTime, 'refreshSetting': refreshSetting,
-                            'refreshSoundSetting': refreshSoundSetting, 'refreshSoundVolumeSetting': refreshSoundVolumeSetting,
-                            'refreshTimerSetting': refreshTimerSetting, 'timeoutSoundSetting': timeoutSoundSetting,
-                            'timeoutSoundVolumeSetting': timeoutSoundVolumeSetting, 'dailyHourDisplaySetting': dailyHourDisplaySetting,
-                            'weeklyHourDisplaySetting': weeklyHourDisplaySetting, 'taskWebsiteSetting': taskWebsiteSetting,
-                            'taskWebsiteURLSetting': taskWebsiteURLSetting, 'employeeWebsiteSetting': employeeWebsiteSetting,
-                            'employeeWebsiteURLSetting': employeeWebsiteURLSetting, 'timesheetWebsiteSetting': timesheetWebsiteSetting,
-                            'timesheetWebsiteURLSetting': timesheetWebsiteURLSetting, 'dynamicGoalsSetting': dynamicGoalsSetting,
-                            'dailyHourGoal': dailyHourGoal, 'weeklyHourGoal': weeklyHourGoal, 'goalNotificationsSetting': goalNotificationsSetting,
-                            'beforeGoalNotificationsSetting': beforeGoalNotificationsSetting, 'notificationMinutes' : notificationMinutes,
-                            'updateNotificationsSetting': updateNotificationsSetting, 'taskCompletionNotificationsSetting': taskCompletionNotificationsSetting});
+        'refreshSoundSetting': refreshSoundSetting, 'refreshSoundVolumeSetting': refreshSoundVolumeSetting,
+        'refreshTimerSetting': refreshTimerSetting, 'timeoutSoundSetting': timeoutSoundSetting,
+        'timeoutSoundVolumeSetting': timeoutSoundVolumeSetting, 'dailyHourDisplaySetting': dailyHourDisplaySetting,
+        'weeklyHourDisplaySetting': weeklyHourDisplaySetting, 'taskWebsiteSetting': taskWebsiteSetting,
+        'taskWebsiteURLSetting': taskWebsiteURLSetting, 'employeeWebsiteSetting': employeeWebsiteSetting,
+        'employeeWebsiteURLSetting': employeeWebsiteURLSetting, 'timesheetWebsiteSetting': timesheetWebsiteSetting,
+        'timesheetWebsiteURLSetting': timesheetWebsiteURLSetting, 'dynamicGoalsSetting': dynamicGoalsSetting,
+        'dailyHourGoal': dailyHourGoal, 'weeklyHourGoal': weeklyHourGoal, 'goalNotificationsSetting': goalNotificationsSetting,
+        'beforeGoalNotificationsSetting': beforeGoalNotificationsSetting, 'notificationMinutes' : notificationMinutes,
+        'updateNotificationsSetting': updateNotificationsSetting, 'taskCompletionNotificationsSetting': taskCompletionNotificationsSetting});
+}
+
+let saveButton = document.getElementById('saveSettings');
+saveButton.onclick = function(element) {
+    saveSettings();
 
     // update save notification
     let savedLabel = document.getElementById('save-confirmation');

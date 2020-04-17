@@ -160,6 +160,10 @@ chrome.runtime.onMessage.addListener(
       case 'reached-aet':
         chrome.browserAction.setBadgeText({text: 'FIN'});
         break;
+
+      case 'verify-settings':
+        verifySettingsIntegrity();
+        break;
     }
   }
 );
