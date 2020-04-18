@@ -1,3 +1,12 @@
+// store timestamp when user clicks button on task list
+var taskButtons = document.querySelectorAll('.ewok-rater-task-option .button');
+taskButtons.forEach(function(button) {
+   button.onclick = (element) => {
+       let timestamp = new Date().getTime();
+       chrome.storage.local.set({'clickTimestamp': timestamp});
+   }
+});
+
 /*
  *Checks the web-page for work and sends message to the background script with its result.
 */

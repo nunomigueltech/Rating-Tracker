@@ -25,6 +25,13 @@
                           "https://www.raterhub.com/evaluation/rater/task/recent_tasks"],
       "js": ["taskContentScript.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.raterhub.com/evaluation/rater/task/show*"],
+      "exclude_matches": ["https://www.raterhub.com/evaluation/rater/settings", "https://www.raterhub.com/evaluation/rater/personalized_task_history/tasks",
+        "https://www.raterhub.com/evaluation/rater/task/recent_tasks"],
+      "js": ["pingContentScript.js"],
+      "run_at": "document_start"
     }
   ],
   "icons": { 

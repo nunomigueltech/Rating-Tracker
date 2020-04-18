@@ -97,10 +97,12 @@ function loadAlarm(taskTimestamp) {
 
 function initialize() {
     // set internal task ID
-    chrome.storage.local.get(['taskID', 'taskTimestamp'], (task) => {
+    chrome.storage.local.get(['taskID', 'taskTimestamp', 'clickTimestamp', 'loadTimestamp'], (task) => {
         let internalTaskID = task['taskID'];
         let pageTaskID = getTaskID();
         let pageTaskTime = getTaskTime();
+        let clickTimestamp = task['clickTimestamp'];
+        let loadTimestamp = task['loadTimestamp'];
 
         if (pageTaskID === null || pageTaskID === '') {
             alert('Strange! There was an error while Rating Tracker was trying to find the id for the current task. You can email nrodriguesdev@gmail.com to get this resolved.');
@@ -113,8 +115,10 @@ function initialize() {
         }
 
         if (internalTaskID != pageTaskID) {
+            let ping = loadTimestamp - clickTimestamp;
+            console.log('New task loaded. There was a server-side delay of ' + ping + ' ms in loading the task.');
             console.log('Tracking new task (ID:' + pageTaskID + ')');
-            let currentTime = new Date().getTime();
+            let currentTime = new Date().getTime() - ping;
             chrome.storage.local.set({'taskID': pageTaskID, 'taskTimestamp': currentTime, 'taskTime': getTaskTime(),
                                       'taskActive': true}, () => { loadAlarm(currentTime); });
         } else {
