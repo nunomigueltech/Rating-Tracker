@@ -46,6 +46,8 @@ function taskTimeout(soundVolume) {
 
 let submitButton = document.querySelector('button#ewok-task-submit-button');
 submitButton.onclick = (element) => {
+    let timestamp = new Date().getTime();
+    chrome.storage.local.set({'clickTimestamp': timestamp});
     chrome.runtime.sendMessage({status : "submit-task"});
 };
 
