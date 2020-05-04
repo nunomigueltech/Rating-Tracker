@@ -75,23 +75,32 @@ submitReportButton.onclick = (element) => {
  * @param {string} taskTimestamp Returned from Date getTime()
  */
 function loadAlarm(taskTimestamp) {
-    chrome.storage.sync.get(['timeoutSoundSetting', 'timeoutSoundVolumeSetting'], (settings) => {
+    chrome.storage.sync.get(['timeoutSoundSetting', 'timeoutSoundVolumeSetting', 'taskCompletionNotificationsSetting',
+                                    'soundTaskRefreshTimeoutSetting'], (settings) => {
         let soundEnabled = settings['timeoutSoundSetting'];
 
         if (soundEnabled) {
             let taskLength = getTaskTime();
             let soundVolume = settings['timeoutSoundVolumeSetting'];
+            let notifyRefreshedTask = settings['soundTaskRefreshTimeoutSetting'];
+            let badgeNotificationEnabled = settings['taskCompletionNotificationsSetting'];
             let taskTimeMilliseconds = taskLength * 60000;
             let currentTime = new Date().getTime(); // time in milliseconds
             let taskTimeElapsed = currentTime - taskTimestamp;
             let taskTimeRemaining = taskTimeMilliseconds - taskTimeElapsed;
 
             console.log('Active task is ' + taskLength + ' minutes long');
-            if (taskTimeRemaining > 0) {
+            if (taskTimeRemaining > 0 || notifyRefreshedTask) {
+                if (taskTimeRemaining < 0) {
+                    taskTimeRemaining = 0;
+                }
+
                 console.log('Setting alarm for task!');
                 window.setTimeout(function() {
                     taskTimeout(soundVolume);
                 }, taskTimeRemaining);
+            } else if (badgeNotificationEnabled) {
+                chrome.runtime.sendMessage({status : "reached-aet"});
             }
         }
     });
@@ -99,12 +108,13 @@ function loadAlarm(taskTimestamp) {
 
 function initialize() {
     // set internal task ID
-    chrome.storage.local.get(['taskID', 'taskTimestamp', 'clickTimestamp', 'loadTimestamp'], (task) => {
+    chrome.storage.local.get(['taskID', 'taskTimestamp', 'clickTimestamp', 'loadTimestamp', 'loadFinishedTimestamp'], (task) => {
         let internalTaskID = task['taskID'];
         let pageTaskID = getTaskID();
         let pageTaskTime = getTaskTime();
         let clickTimestamp = task['clickTimestamp'];
         let loadTimestamp = task['loadTimestamp'];
+        let loadFinishedTimestamp = task['loadFinishedTimestamp'];
 
         if (pageTaskID === null || pageTaskID === '') {
             alert('Strange! There was an error while Rating Tracker was trying to find the id for the current task. You can email nrodriguesdev@gmail.com to get this resolved.');
@@ -117,12 +127,26 @@ function initialize() {
         }
 
         if (internalTaskID != pageTaskID) {
-            let ping = loadTimestamp - clickTimestamp;
-            console.log('New task loaded. There was a server-side delay of ' + ping + ' ms in loading the task.');
-            console.log('Tracking new task (ID:' + pageTaskID + ')');
-            let currentTime = new Date().getTime() - ping;
-            chrome.storage.local.set({'taskID': pageTaskID, 'taskTimestamp': currentTime, 'taskTime': getTaskTime(),
-                                      'taskActive': true}, () => { loadAlarm(currentTime); });
+            chrome.storage.sync.get(['timekeepingEstimatedSetting'], (setting) => {
+                console.log('Tracking new task (ID:' + pageTaskID + ')');
+
+                let htmlLoadTime = loadTimestamp - clickTimestamp;
+                console.log('It took ' + htmlLoadTime + ' ms to send, receive, and process the server response.');
+
+                let domLoadTime = loadFinishedTimestamp - loadTimestamp;
+                console.log('It took ' + domLoadTime + ' ms to load the DOM.');
+
+                let currentTime = new Date().getTime();
+                if (setting['timekeepingEstimatedSetting']) {
+                    // network delay estimation ENABLED
+                    let estimatedDelay = Math.floor((htmlLoadTime*.5) * (Math.log10(domLoadTime)/3));
+                    console.log('Adjusting timestamp for estimated delay of ' + estimatedDelay + ' ms.');
+                    currentTime -= estimatedDelay;
+                }
+
+                chrome.storage.local.set({'taskID': pageTaskID, 'taskTimestamp': currentTime, 'taskTime': getTaskTime(),
+                    'taskActive': true}, () => { loadAlarm(currentTime); });
+            });
         } else {
             console.log('Resuming tracking for task (ID:' + pageTaskID + ')');
             loadAlarm(task['taskTimestamp']); // alarm needs to be loaded each time the page refreshes, even if it's the same task

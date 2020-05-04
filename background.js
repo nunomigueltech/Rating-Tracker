@@ -294,7 +294,9 @@ function verifySettingsIntegrity() {
     'beforeGoalNotificationsSetting': true,
     'notificationMinutes': 15,
     'updateNotificationsEnabled': true,
-    'taskCompletionNotificationsEnabled': true
+    'taskCompletionNotificationsEnabled': true,
+    'timekeepingEstimatedSetting': false,
+    'soundTaskRefreshTimeoutSetting': false
   };
 
   chrome.storage.sync.get(Object.keys(defaultSettings), (settings) => {

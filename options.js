@@ -244,7 +244,8 @@ function loadSettings() {
                              'dynamicGoalsSetting', 'dailyHourGoal', 'weeklyHourGoal',
                              'beforeGoalNotificationsSetting', 'notificationMinutes',
                              'goalNotificationsSetting', 'updateNotificationsSetting',
-                             'taskCompletionNotificationsSetting'] ,
+                             'taskCompletionNotificationsSetting', 'timekeepingEstimatedSetting',
+                             'soundTaskRefreshTimeoutSetting'] ,
                     function(data) {
 
         let minTime = getValue(data['minTime'], 30);
@@ -271,6 +272,8 @@ function loadSettings() {
         let notificationMinutes = getValue(data['notificationMinutes'], 15);
         let updateNotificationsEnabled = getValue(data['updateNotificationsSetting'], true);
         let taskCompletionNotificationsEnabled = getValue(data['taskCompletionNotificationsSetting'], true);
+        let timekeepingEstimatedEnabled = getValue(data['timekeepingEstimatedSetting'], false);
+        let soundTaskRefreshTimeoutEnabled = getValue(data['soundTaskRefreshTimeoutSetting'], false);
 
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
@@ -301,6 +304,8 @@ function loadSettings() {
         document.getElementById('notificationMinutes').disabled = !beforeGoalNotificationsEnabled;
         document.getElementById('updateNotificationsEnabled').checked = updateNotificationsEnabled;
         document.getElementById('taskCompletionNotificationsEnabled').checked = taskCompletionNotificationsEnabled;
+        document.getElementById('timekeepingEstimated').checked = timekeepingEstimatedEnabled;
+        document.getElementById('soundTaskRefreshTimeout').checked = soundTaskRefreshTimeoutEnabled;
         updateRefreshFields(!refreshEnabled);
     });
 }
@@ -330,6 +335,8 @@ function saveSettings() {
     let notificationMinutes = parseInt(document.getElementById('notificationMinutes').value);
     let updateNotificationsSetting = document.getElementById('updateNotificationsEnabled').checked;
     let taskCompletionNotificationsSetting = document.getElementById('taskCompletionNotificationsEnabled').checked;
+    let timekeepingEstimatedSetting = document.getElementById('timekeepingEstimated').checked;
+    let soundTaskRefreshTimeoutSetting = document.getElementById('soundTaskRefreshTimeout').checked;
 
     updateMinMaxFields(1, minTime, maxTime, 'minTime', 'maxTime');
     updateMinMaxFields(1, dailyHourGoal, weeklyHourGoal, 'dailyHourGoal', 'weeklyHourGoal');
@@ -349,7 +356,8 @@ function saveSettings() {
         'timesheetWebsiteURLSetting': timesheetWebsiteURLSetting, 'dynamicGoalsSetting': dynamicGoalsSetting,
         'dailyHourGoal': dailyHourGoal, 'weeklyHourGoal': weeklyHourGoal, 'goalNotificationsSetting': goalNotificationsSetting,
         'beforeGoalNotificationsSetting': beforeGoalNotificationsSetting, 'notificationMinutes' : notificationMinutes,
-        'updateNotificationsSetting': updateNotificationsSetting, 'taskCompletionNotificationsSetting': taskCompletionNotificationsSetting});
+        'updateNotificationsSetting': updateNotificationsSetting, 'taskCompletionNotificationsSetting': taskCompletionNotificationsSetting,
+        'timekeepingEstimatedSetting': timekeepingEstimatedSetting, 'soundTaskRefreshTimeoutSetting': soundTaskRefreshTimeoutSetting});
 }
 
 let saveButton = document.getElementById('saveSettings');

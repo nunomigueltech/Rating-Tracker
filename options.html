@@ -187,8 +187,15 @@
                             <input type="range" min="1" max="100" value="100" class="slider" id="soundLevelTaskFound">
                             <Br> <bR>
                             <input type="checkbox" id="soundTaskTimeout" checked> Play a sound when the task reaches the AET
+                            <Br>
+                            <input type="checkbox" id="soundTaskRefreshTimeout"> Play this sound if you refresh a task you've already finished
                             <br>
                             <input type="range" min="1" max="100" value="100" class="slider" id="soundLevelTaskTimeout">
+                            <br>
+                            <b>Timekeeping Settings</b>
+                            <br>
+                            <input type="checkbox" id="timekeepingEstimated"> Enable synchronization with internal
+                            Lionbridge task timer <br> (uses an estimate of network delay)
                         </div>
                         <div class="column">
                             <b>Pop-up Settings</b> 
@@ -382,8 +389,8 @@
                                     <p>
                                         When delays are encountered on the work website it's common to see a great disparity
                                         between the internal Lionbridge timer (that can be enabled through the website settings
-                                        page) and the internal Rating Tracker timer. New measures have been introduced with
-                                        version 1.1.0 that should reduce this problem.
+                                        page) and the internal Rating Tracker timer. A new measure have been introduced with
+                                        version 1.1.0 that should reduce this problem. <b>This is disabled by default.</b>
                                     </p>
                                 </li>
                             </ul>
