@@ -130,15 +130,15 @@ function initialize() {
             chrome.storage.sync.get(['timekeepingEstimatedSetting'], (setting) => {
                 console.log('Tracking new task (ID:' + pageTaskID + ')');
 
-                let htmlLoadTime = loadTimestamp - clickTimestamp;
-                console.log('It took ' + htmlLoadTime + ' ms to send, receive, and process the server response.');
-
-                let domLoadTime = loadFinishedTimestamp - loadTimestamp;
-                console.log('It took ' + domLoadTime + ' ms to load the DOM.');
-
                 let currentTime = new Date().getTime();
                 if (setting['timekeepingEstimatedSetting']) {
                     // network delay estimation ENABLED
+                    let htmlLoadTime = loadTimestamp - clickTimestamp;
+                    console.log('It took ' + htmlLoadTime + ' ms to send, receive, and process the server response.');
+
+                    let domLoadTime = loadFinishedTimestamp - loadTimestamp;
+                    console.log('It took ' + domLoadTime + ' ms to load the DOM.');
+
                     let estimatedDelay = Math.floor((htmlLoadTime*.5) * (Math.log10(domLoadTime)/3));
                     console.log('Adjusting timestamp for estimated delay of ' + estimatedDelay + ' ms.');
                     currentTime -= estimatedDelay;
