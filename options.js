@@ -11,8 +11,14 @@ for (let i = 0; i < tabs.length; i++) {
 /**
  * Changes content visible to the user according to the tab ID selected.
  * @param {number} tabIndex Integer reflecting tab ID in options menu.
+ * @return {boolean} returns true if tab was successfully found and activated
  */
 function selectTab(tabID) {
+    selectedTab = document.getElementById(tabID + 'Content')
+    if (selectedTab == null) {
+        return false;
+    }
+
     for (let i = 0; i < tabs.length; i++) {
         if (tabs[i].id != tabID) {
             document.getElementById(tabs[i].id + 'Content').style.display = 'none';
@@ -21,6 +27,7 @@ function selectTab(tabID) {
 
     //Show the Selected Tab
     document.getElementById(tabID + 'Content').style.display = 'block';
+    return true;
 }
 
 /**
@@ -366,10 +373,9 @@ function loadTab() {
     let parameterString = window.location.search;
     let urlParams = new URLSearchParams(parameterString);
     let tabName = urlParams.get('tab')
-    if (tabName != null) {
-        selectTab(tabName);
-    } else {
-        selectTab('general');
+
+    if (!selectTab(tabName)) {
+        selectTab('general'); // if url is invalid then it selects the fallback (general) tab
     }
 }
 
