@@ -26,6 +26,13 @@ timesheetWebsiteButton.onclick = function() {
     chrome.tabs.create({url: timesheetWebsiteURL})
 };
 
+let calendarButton = document.getElementById('openCalendar');
+calendarButton.onclick = function() {
+    let calendarTabURL = chrome.extension.getURL('options.html?tab=calendar');
+    chrome.tabs.create({url: calendarTabURL})
+};
+
+
 let updateButton = document.getElementById('updateText');
 updateButton.onclick = function() {
     let updatePageURL = chrome.extension.getURL('update.html');

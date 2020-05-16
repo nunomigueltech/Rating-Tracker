@@ -370,5 +370,16 @@ saveButton.onclick = function(element) {
     window.setTimeout(fadeoutSavedLabel, 3000);
 };
 
+function loadTab() {
+    let parameterString = window.location.search;
+    let urlParams = new URLSearchParams(parameterString);
+    if (urlParams.get('tab') == 'calendar') {
+        selectTab(2);
+    } else {
+        selectTab(1);
+    }
+}
+
+loadTab();
 loadSettings();
 loadHourView();
