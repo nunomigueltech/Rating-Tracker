@@ -220,11 +220,18 @@ function getNotificationString(periodID, storage, minutesWorked) {
  * @param {number} dailyMinutes Float containing the minutes worked for the day.
  * @param {number} weeklyMinutes Float containing the minutes worked for the week.
  */
-function handleNotifications(dailyMinutes, weeklyMinutes) {
-  chrome.storage.sync.get(['dailyHourGoal', 'weeklyHourGoal', 'beforeGoalNotificationsSetting', 'notificationMinutes',
+function handleNotifications(previousMinutes, weeklyMinutes) {
+  let todaysDateKey = getDateKey();
+  chrome.storage.sync.get([todaysDateKey, 'dailyHourGoal', 'weeklyHourGoal', 'beforeGoalNotificationsSetting', 'notificationMinutes',
     'goalNotificationsSetting'], (storage) => {
-    let dailyNotification = getNotificationString('daily', storage, dailyMinutes);
-    let weeklyNotification = getNotificationString('weekly', storage, weeklyMinutes);
+    let dailyMinutes = storage[todaysDateKey];
+    let timeChange = dailyMinutes - previousMinutes
+    let previousWeeklyMinutes = weeklyMinutes - timeChange;
+    let dailyGoalMinutes = storage['dailyHourGoal'] * 60;
+    let weeklyGoalMinutes = storage['weeklyHourGoal'] * 60;
+
+    let dailyNotification = (previousMinutes < dailyGoalMinutes)? getNotificationString('daily', storage, dailyMinutes) : '';
+    let weeklyNotification = (previousWeeklyMinutes < weeklyGoalMinutes)?  getNotificationString('weekly', storage, weeklyMinutes) : '';
     let notificationText = dailyNotification + weeklyNotification;
 
     if (notificationText != '') {
@@ -244,11 +251,11 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       let oldMinutes = getValue(value, 'oldValue', 0);
       let newMinutes = getValue(value, 'newValue', 0);
 
-      if (newMinutes > oldMinutes) {
+      if (newMinutes > oldMinutes) { // to be removed/changed when time edits are allowed
         calculateWeekHours()
             .then(function(weeklyMinutes) {
               chrome.runtime.sendMessage({status: "update-calendar", timeDay: newMinutes, timeWeek: weeklyMinutes});
-              handleNotifications(newMinutes, weeklyMinutes);
+              handleNotifications(oldMinutes, weeklyMinutes);
             })
             .catch(function(val) {
               console.log('ERROR: Couldnt calculate weekly work hours.')
