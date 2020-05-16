@@ -26,7 +26,7 @@
             padding: 10px;
         }
 
-        #tab1, #tab2, #tab3, #tab4 {
+        #general, #calendar, #changelog, #about {
             float: left;
             padding: 5px 50px 5px 50px;
             background: #52616b;
@@ -36,11 +36,11 @@
             border-radius: 2px;
         }
 
-        #tab1:hover, #tab2:hover, #tab3:hover, #tab4:hover {
+        #general:hover, #calendar:hover, #changelog:hover, #about:hover {
         background: #c9d6df;
         }
 
-        #tab1Content, #tab2Content, #tab3Content, #tab4Content {
+        #generalContent, #calendarContent, #changelogContent, #aboutContent {
             width: 1100px;
             height: 700px;
             padding: 20px;
@@ -50,14 +50,14 @@
             display: none;
         }
 
-        #tab2Content input {
+        #calendarContent input {
             width: 25px;
             padding-left: 10px;
             padding-right: 10px;
-            -webkit-user-select: none;   
+            -webkit-user-select: none;
         }
 
-        #tab2Content input:focus {
+        #calendarContent input:focus {
             outline-width: 0;
         }
 
@@ -106,7 +106,7 @@
             height: 25px;
             background-color: #c9d6df;
         }
-        
+
         #weeklyView td {
             border-collapse: collapse;
             border: 1px solid #1e2022;
@@ -138,6 +138,10 @@
         .oldVersion {
             display: none;
         }
+
+        #hideTableCell {
+            visibility:collapse;
+        }
     </style>
   </head>
   <body>
@@ -145,22 +149,22 @@
         <div id="title">Rating Tracker Options</div>
         <div id="content">
             <div id="inner-content">
-                <div id="tab1">General</div>
-                <div id="tab2">Hour View</div>
-                <div id="tab3">Changelog</div>
-                <div id="tab4">About</div>
+                <div id="general" class="tab">General</div>
+                <div id="calendar" class="tab">Hour View</div>
+                <div id="changelog" class="tab">Changelog</div>
+                <div id="about" class="tab">About</div>
                 <br/>
 
-                <div id="tab1Content">
+                <div id="generalContent">
                     <div class="row">
                         <div class="column">
                             <input type="radio" id="refreshEnabled" name="refresh-setting" value="enable" checked> <b>Enable</b> page refreshing <br>
                             <input type="radio" id="refreshDisabled" name="refresh-setting" value="disable"> <b>Disable</b> page refreshing <br><br>
-                            <b>Refresh Settings</b> 
-                            
+                            <b>Refresh Settings</b>
+
                             <br>
                             Waits between <b>min</b> and <b>max</b> seconds.
-                            <table> 
+                            <table>
                                 <tr>
                                     <td>Minimum Time:</td>
                                     <td><input id="minTime" type="number"></td>
@@ -173,7 +177,7 @@
                             <input type="checkbox" id="displayRefreshTimer" checked> Enable the refresh timer displayed on the extension icon
                             <br>
                             <br>
-                            <b>Sound Settings</b> 
+                            <b>Sound Settings</b>
                             <br>
                             <input type="checkbox" id="soundTaskFound" checked> Play a sound when tasks are available after a refresh
                             <br>
@@ -191,7 +195,7 @@
                             Lionbridge task timer <br> (uses an estimate of network delay)
                         </div>
                         <div class="column">
-                            <b>Pop-up Settings</b> 
+                            <b>Pop-up Settings</b>
                             <br>
                             These settings affect the pop-up that appears when you click this extension's icon.
                             <br>
@@ -235,9 +239,9 @@
                             </table>
                         </div>
                         <div class="column">
-                            <b>Goal Settings</b> 
+                            <b>Goal Settings</b>
                             <br>
-                            <table class="settingsTable"> 
+                            <table class="settingsTable">
                                 <tr>
                                     <td>Daily hour goal:</td>
                                     <td><input class="numberFields" id="dailyHourGoal" type="number" value="8" min="0.0" max="8.0"></input></td>
@@ -264,12 +268,12 @@
                                 <tr>
                                     <td colspan="2">
                                         <input type="checkbox" id="goalNotificationsEnabled" checked> Enable Chrome notifications when you reach a goal
-                                    </td> 
+                                    </td>
                                 </tr>
                                 <tr>
                                    <td colspan="2">
                                     <input type="checkbox" id="beforeGoalNotificationsEnabled" checked> Enable Chrome notifications <b>before</b> reaching a goal:
-                                   </td> 
+                                   </td>
                                 </tr>
                                 <tr>
                                     <td>Time before goal to notify (minutes):</td>
@@ -279,14 +283,14 @@
                             <div id="storageButtons">
                                 <button id="saveSettings" type="button">Save Settings</button>
                                 <button id="resetStorage" type="button">Clear Storage</button>
-                            </div>      
-                            <div id="save-confirmation"><h3>Saved!</h3></div>  
+                            </div>
+                            <div id="save-confirmation"><h3>Saved!</h3></div>
                         </div>
                     </div>
-                    
+
                 </div>
 
-                <div id="tab2Content">
+                <div id="calendarContent">
                     <div id="weeklyViewNavigation">
                         <input type="image" src="images/left-arrow.png" id="prevWeekButton"/>
                         <div id="navigationHeader">First day - Last day</div>
@@ -295,6 +299,7 @@
                     <br>
                     <table id="weeklyView">
                         <tr>
+                            <th id="hideTableCell"></th>
                             <th>Sunday</th>
                             <th>Monday</th>
                             <th>Tuesday</th>
@@ -305,6 +310,7 @@
                             <th></th>
                         </tr>
                         <tr>
+                            <th id="hideTableCell"></th>
                             <th id="day0">Date</th>
                             <th id="day1">Date</th>
                             <th id="day2">Date</th>
@@ -315,25 +321,48 @@
                             <th>Total</th>
                         </tr>
                         <tr>
-                            <td id="day0Total">0.0 hours</td>
-                            <td id="day1Total">0.0 hours</td>
-                            <td id="day2Total">0.0 hours</td>
-                            <td id="day3Total">0.0 hours</td>
-                            <td id="day4Total">0.0 hours</td>
-                            <td id="day5Total">0.0 hours</td>
-                            <td id="day6Total">0.0 hours</td>
-                            <td id="weekTotal">0.0 hours</td>
+                            <th>Regular</th>
+                            <td id="day0Total">0.00 hours</td>
+                            <td id="day1Total">0.00 hours</td>
+                            <td id="day2Total">0.00 hours</td>
+                            <td id="day3Total">0.00 hours</td>
+                            <td id="day4Total">0.00 hours</td>
+                            <td id="day5Total">0.00 hours</td>
+                            <td id="day6Total">0.00 hours</td>
+                            <td id="weekTotal">0.00 hours</td>
+                        </tr>
+                        <tr>
+                            <th>Training</th>
+                            <td id="day0TrainingTotal">0.00 hours</td>
+                            <td id="day1TrainingTotal">0.00 hours</td>
+                            <td id="day2TrainingTotal">0.00 hours</td>
+                            <td id="day3TrainingTotal">0.00 hours</td>
+                            <td id="day4TrainingTotal">0.00 hours</td>
+                            <td id="day5TrainingTotal">0.00 hours</td>
+                            <td id="day6TrainingTotal">0.00 hours</td>
+                            <td id="weekTrainingTotal">0.00 hours</td>
+                        </tr>
+                        <tr>
+                            <td id="hideTableCell"></td>
+                            <td id="hideTableCell"></td>
+                            <td id="hideTableCell"></td>
+                            <td id="hideTableCell"></td>
+                            <td id="hideTableCell"></td>
+                            <td id="hideTableCell"></td>
+                            <td id="hideTableCell"></td>
+                            <td id="hideTableCell"></td>
+                            <td>0.00 hours</td>
                         </tr>
                     </table>
                 </div>
 
-                <div id="tab3Content">
+                <div id="changelogContent">
                     Select a version:
                     <select id="versionSelect">
                         <option value="version_1_1_0">1.1.0</option>
                         <option value="version_1_0_0">1.0.0</option>
                     </select>
-                    <div id="changelogContent">
+                    <div id="changelogInfo">
                         <h2 id="changelogVersion">Version 1.1.0 Changelog</h2>
                         <div id="version_1_1_0" class="latestVersion">
                             <h1>What's New</h1>
@@ -411,7 +440,7 @@
                     </div>
                 </div>
 
-                <div id="tab4Content">
+                <div id="aboutContent">
                     <p>This extension abides by Lionbridge's Terms of Service and privacy requirements.
                         The only information that it stores about your work sessions is the time that you 
                         spend on the job site. It is written to support Chrome Sync, so your extension settings 

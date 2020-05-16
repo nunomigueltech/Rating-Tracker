@@ -4,36 +4,18 @@
  * Changes content visible to the user according to the tab ID selected.
  * @param {number} tabIndex Integer reflecting tab ID in options menu.
  */
-function selectTab(tabIndex) {
-    //Hide All Tabs
-    document.getElementById('tab1Content').style.display = "none";
-    document.getElementById('tab2Content').style.display = "none";
-    document.getElementById('tab3Content').style.display = "none";
-    document.getElementById('tab4Content').style.display = "none";
-    
+function selectTab(tabID) {
     //Show the Selected Tab
-    document.getElementById('tab' + tabIndex + 'Content').style.display = "block";
+    document.getElementById(tabID + 'Content').style.display = 'block';
 }
 
-let tab1 = document.getElementById('tab1');
-tab1.onclick = (element) => {
-    selectTab(1);
-};
-
-let tab2 = document.getElementById('tab2');
-tab2.onclick = (element) => {
-    selectTab(2);
-};
-
-let tab3 = document.getElementById('tab3');
-tab3.onclick = (element) => {
-    selectTab(3);
-};
-
-let tab4 = document.getElementById('tab4');
-tab4.onclick = (element) => {
-    selectTab(4);
-};
+let tabs = document.getElementsByClassName('tab');
+for (let i = 0; i < tabs.length; i++) {
+    tabs[i].onclick = (element) => {
+        let optionsTabURL = chrome.extension.getURL('options.html?tab=' + tabs[i].id)
+        chrome.tabs.update({url: optionsTabURL});
+    }
+}
 
 /**
  * START OF CHANGELOG HANDLER
@@ -377,10 +359,11 @@ saveButton.onclick = function(element) {
 function loadTab() {
     let parameterString = window.location.search;
     let urlParams = new URLSearchParams(parameterString);
-    if (urlParams.get('tab') == 'calendar') {
-        selectTab(2);
+    let tabName = urlParams.get('tab')
+    if (tabName != null) {
+        selectTab(tabName);
     } else {
-        selectTab(1);
+        selectTab('general');
     }
 }
 
