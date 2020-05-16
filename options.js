@@ -1,20 +1,26 @@
 // START OF UI HANDLING
+let tabs = document.getElementsByClassName('tab');
+for (let i = 0; i < tabs.length; i++) {
+    tabs[i].onclick = (element) => {
+        let optionsTabURL = chrome.extension.getURL('options.html?tab=' + tabs[i].id)
+        selectTab(tabs[i].id);
+        window.history.pushState({path: optionsTabURL},'',optionsTabURL);
+    }
+}
 
 /**
  * Changes content visible to the user according to the tab ID selected.
  * @param {number} tabIndex Integer reflecting tab ID in options menu.
  */
 function selectTab(tabID) {
+    for (let i = 0; i < tabs.length; i++) {
+        if (tabs[i].id != tabID) {
+            document.getElementById(tabs[i].id + 'Content').style.display = 'none';
+        }
+    }
+
     //Show the Selected Tab
     document.getElementById(tabID + 'Content').style.display = 'block';
-}
-
-let tabs = document.getElementsByClassName('tab');
-for (let i = 0; i < tabs.length; i++) {
-    tabs[i].onclick = (element) => {
-        let optionsTabURL = chrome.extension.getURL('options.html?tab=' + tabs[i].id)
-        chrome.tabs.update({url: optionsTabURL});
-    }
 }
 
 /**
