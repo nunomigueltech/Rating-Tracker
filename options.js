@@ -245,7 +245,7 @@ function loadSettings() {
                              'beforeGoalNotificationsSetting', 'notificationMinutes',
                              'goalNotificationsSetting', 'updateNotificationsSetting',
                              'taskCompletionNotificationsSetting', 'timekeepingEstimatedSetting',
-                             'soundTaskRefreshTimeoutSetting'] ,
+                             'soundTaskRefreshTimeoutSetting', 'calendarShortcutSetting'] ,
                     function(data) {
 
         let minTime = getValue(data['minTime'], 30);
@@ -274,6 +274,7 @@ function loadSettings() {
         let taskCompletionNotificationsEnabled = getValue(data['taskCompletionNotificationsSetting'], true);
         let timekeepingEstimatedEnabled = getValue(data['timekeepingEstimatedSetting'], false);
         let soundTaskRefreshTimeoutEnabled = getValue(data['soundTaskRefreshTimeoutSetting'], false);
+        let calendarShortcutEnabled = getValue(data['calendarShortcutSetting'], false);
 
         document.getElementById('minTime').value = minTime;
         document.getElementById('maxTime').value = maxTime;
@@ -306,6 +307,7 @@ function loadSettings() {
         document.getElementById('taskCompletionNotificationsEnabled').checked = taskCompletionNotificationsEnabled;
         document.getElementById('timekeepingEstimated').checked = timekeepingEstimatedEnabled;
         document.getElementById('soundTaskRefreshTimeout').checked = soundTaskRefreshTimeoutEnabled;
+        document.getElementById('calendarShortcut').checked = calendarShortcutEnabled;
         updateRefreshFields(!refreshEnabled);
     });
 }
@@ -337,6 +339,7 @@ function saveSettings() {
     let taskCompletionNotificationsSetting = document.getElementById('taskCompletionNotificationsEnabled').checked;
     let timekeepingEstimatedSetting = document.getElementById('timekeepingEstimated').checked;
     let soundTaskRefreshTimeoutSetting = document.getElementById('soundTaskRefreshTimeout').checked;
+    let calendarShortcutSetting = document.getElementById('calendarShortcut').checked;
 
     updateMinMaxFields(1, minTime, maxTime, 'minTime', 'maxTime');
     updateMinMaxFields(1, dailyHourGoal, weeklyHourGoal, 'dailyHourGoal', 'weeklyHourGoal');
@@ -357,7 +360,8 @@ function saveSettings() {
         'dailyHourGoal': dailyHourGoal, 'weeklyHourGoal': weeklyHourGoal, 'goalNotificationsSetting': goalNotificationsSetting,
         'beforeGoalNotificationsSetting': beforeGoalNotificationsSetting, 'notificationMinutes' : notificationMinutes,
         'updateNotificationsSetting': updateNotificationsSetting, 'taskCompletionNotificationsSetting': taskCompletionNotificationsSetting,
-        'timekeepingEstimatedSetting': timekeepingEstimatedSetting, 'soundTaskRefreshTimeoutSetting': soundTaskRefreshTimeoutSetting});
+        'timekeepingEstimatedSetting': timekeepingEstimatedSetting, 'soundTaskRefreshTimeoutSetting': soundTaskRefreshTimeoutSetting,
+        'calendarShortcutSetting': calendarShortcutSetting});
 }
 
 let saveButton = document.getElementById('saveSettings');

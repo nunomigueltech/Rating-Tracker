@@ -303,7 +303,8 @@ function verifySettingsIntegrity() {
     'updateNotificationsEnabled': true,
     'taskCompletionNotificationsEnabled': true,
     'timekeepingEstimatedSetting': false,
-    'soundTaskRefreshTimeoutSetting': false
+    'soundTaskRefreshTimeoutSetting': false,
+    'calendarShortcutSetting': false
   };
 
   chrome.storage.sync.get(Object.keys(defaultSettings), (settings) => {

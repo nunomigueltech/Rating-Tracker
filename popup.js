@@ -165,7 +165,7 @@ function initialize() {
                 'dynamicGoalsSetting', 'taskWebsiteSetting', 'taskWebsiteURLSetting',
                 'taskWebsiteSetting', 'taskWebsiteURLSetting', 'employeeWebsiteSetting',
                 'timesheetWebsiteSetting', 'timesheetWebsiteURLSetting', 'dailyHourGoal',
-                'weeklyHourGoal', 'updateNotificationsSetting'], function(data) {
+                'weeklyHourGoal', 'updateNotificationsSetting', 'calendarShortcutSetting'], function(data) {
                 let minutesWorkedToday = getValue(data, dateKey, 0.0);
                 let hoursWorkedToday = minutesWorkedToday / 60.0;
 
@@ -184,6 +184,8 @@ function initialize() {
                 let timesheetWebsiteButtonEnabled = getValue(data, 'timesheetWebsiteSetting', false);
                 timesheetWebsiteURL = getValue(data, 'timesheetWebsiteURLSetting', '');
 
+                let calendarShortcutEnabled = getValue(data, 'calendarShortcutSetting', false);
+
                 let dailyHourGoal = getValue(data, 'dailyHourGoal', 8.0);
                 let weeklyHourGoal = getValue(data, 'weeklyHourGoal', 20.0);
 
@@ -196,6 +198,7 @@ function initialize() {
                 hideElement('taskWebsiteButton', taskWebsiteButtonEnabled);
                 hideElement('openEmployeeWebsite', employeeWebsiteButtonEnabled);
                 hideElement('openTimesheetWebsite', timesheetWebsiteButtonEnabled);
+                hideElement('openCalendar', calendarShortcutEnabled);
 
                 let additionalButtonsEnabled = employeeWebsiteButtonEnabled || timesheetWebsiteButtonEnabled;
                 hideElement('additionalSiteButtons', additionalButtonsEnabled);
