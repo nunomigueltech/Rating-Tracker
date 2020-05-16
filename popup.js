@@ -200,7 +200,7 @@ function initialize() {
                 hideElement('openTimesheetWebsite', timesheetWebsiteButtonEnabled);
                 hideElement('openCalendar', calendarShortcutEnabled);
 
-                let additionalButtonsEnabled = employeeWebsiteButtonEnabled || timesheetWebsiteButtonEnabled;
+                let additionalButtonsEnabled = employeeWebsiteButtonEnabled || timesheetWebsiteButtonEnabled || calendarShortcutEnabled;
                 hideElement('additionalSiteButtons', additionalButtonsEnabled);
 
                 let isUpToDate = extension_version === localExtensionVersion;
