@@ -274,6 +274,10 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
+chrome.runtime.onUpdateAvailable.addListener((details) => {
+  chrome.storage.local.set({'updateAvailable' : true});
+});
+
 function verifySettingsIntegrity() {
   console.log('Verifying settings integrity..')
   let defaultSettings = new Object();
@@ -324,4 +328,8 @@ function verifySettingsIntegrity() {
 }
 
 chrome.runtime.onStartup.addListener(verifySettingsIntegrity);
-chrome.runtime.onInstalled.addListener(verifySettingsIntegrity);
+chrome.runtime.onInstalled.addListener((details) => {
+  chrome.storage.local.set({'updateAvailable' : false});
+  chrome.storage.local.set({'ignoreUpdatePrompt' : false});
+  verifySettingsIntegrity;
+});

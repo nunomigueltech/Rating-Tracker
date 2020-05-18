@@ -54,7 +54,7 @@
       #openEmployeeWebsite:hover, #openTimesheetWebsite:hover, #openCalendar:hover {
         width: 27px;
       }
-      #updateNotification {
+      #updateNotification, #updateAvailableNotification {
         display: flex;
         margin-bottom: 5px;
         overflow: auto;
@@ -63,13 +63,13 @@
         height: 22px;
         text-decoration-color: #1e2022;
       }
-      #updateNotification:hover {
+      #updateNotification:hover, #updateAvailableNotification {
         background-color: rgb(164, 214, 228);
         border-radius: 20px;
         cursor: pointer;
         height: 22px;
       }
-      #updateCloseImg {
+      #updateCloseImg, #updateAvailableCloseImg {
         margin-left: 5px;
       }
     </style>
@@ -87,6 +87,10 @@
       <div id="updateNotification">
         <h4 id="updateText">Checking for new update...</h4>
         <img id="updateCloseImg" src="images/close.png" height="14" width="14">
+      </div>
+      <div id="updateAvailableNotification">
+        <h4 id="updateAvailableText">New update! Click to install </h4>
+        <img id="updateAvailableCloseImg" src="images/close.png" height="14" width="14">
       </div>
       <h3 id ="hoursWorkedToday">0.0 / 8.0 hours today</h3>
       <h4 id ="hoursWorkedWeek">0.0 / 20.0 hours this week</h4>

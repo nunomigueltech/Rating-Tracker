@@ -1,7 +1,7 @@
 /*
     INTERNAL VERSION
  */
-const extension_version = "1.1.0";
+const EXTENSION_VERSION = "1.1.0";
 
 let settingsButton = document.getElementById('openSettings');
 settingsButton.onclick = function() {
@@ -32,18 +32,28 @@ calendarButton.onclick = function() {
     chrome.tabs.create({url: calendarTabURL})
 };
 
-
 let updateButton = document.getElementById('updateText');
 updateButton.onclick = function() {
     let updatePageURL = chrome.extension.getURL('update.html');
     chrome.tabs.create({url: updatePageURL});
-    chrome.storage.local.set({'localExtensionVersion' : extension_version});
+    chrome.storage.local.set({'localExtensionVersion' : EXTENSION_VERSION});
 };
 
 let hideUpdateButton = document.getElementById('updateCloseImg');
 hideUpdateButton.onclick = function() {
     hideElement('updateNotification', false);
-    chrome.storage.local.set({'localExtensionVersion' : extension_version});
+    chrome.storage.local.set({'localExtensionVersion' : EXTENSION_VERSION});
+};
+
+let updateAvailableButton = document.getElementById('updateAvailableText');
+updateAvailableButton.onclick = function() {
+    chrome.runtime.reload();
+};
+
+let hideAvailableUpdateButton = document.getElementById('updateAvailableCloseImg');
+hideAvailableUpdateButton.onclick = function() {
+    hideElement('updateAvailableNotification', false);
+    chrome.storage.local.set({'ignoreUpdatePrompt' : true});
 };
 
 /**
@@ -97,10 +107,12 @@ function updateGoalText(goalTextEnabled, labelElementName, labelText, currentPro
  * @param {string} elementName String containing the ID of the element you wish to (possibly) hide.
  * @param {boolean} setting Boolean that determines the visibility of the element.
  */
-function hideElement(elementName, setting) {
-    if (!setting) {
-        let popupElement = document.getElementById(elementName);
-        popupElement.style.display = 'none';
+function hideElement(elementName) {
+    let element = document.getElementById(elementName)
+    if (element == null) {
+        console.log('Could not find element ' + elementName)
+    } else {
+        element.style.display = 'none';
     }
 }
 
@@ -154,12 +166,15 @@ function initialize() {
         let values = Object.values(items);
         for (let i = 0; i < values.length; i++) {
             if (values[i] !== 'undefined') {
-                minutesWorkedWeek += parseFloat(values[i]);
+                minutesWorkedWeek += values[i];
+                console.log('Adding ' + values[i] + ' to weekly count for'  + dateKeys[i])
             }
         }
 
-        chrome.storage.local.get(['localExtensionVersion'], function(data) {
+        chrome.storage.local.get(['localExtensionVersion', 'updateAvailable', 'ignoreUpdatePrompt'], function(data) {
             let localExtensionVersion = data['localExtensionVersion'];
+            let ignoreUpdatePrompt = getValue(data, 'ignoreUpdatePrompt', false);
+            let updateAvailable = getValue(data, 'updateAvailable', false);
             let dateKey = getDateKey();
             chrome.storage.sync.get([dateKey, 'dailyHourDisplaySetting', 'weeklyHourDisplaySetting',
                 'dynamicGoalsSetting', 'taskWebsiteSetting', 'taskWebsiteURLSetting',
@@ -195,24 +210,45 @@ function initialize() {
                 updateGoalText(displayWeeklyHoursEnabled, 'hoursWorkedWeek', ' hours this week',
                     hoursWorkedWeek, weeklyHourGoal, dynamicGoalsEnabled);
 
-                hideElement('taskWebsiteButton', taskWebsiteButtonEnabled);
-                hideElement('openEmployeeWebsite', employeeWebsiteButtonEnabled);
-                hideElement('openTimesheetWebsite', timesheetWebsiteButtonEnabled);
-                hideElement('openCalendar', calendarShortcutEnabled);
+                if (!taskWebsiteButtonEnabled) {
+                    hideElement('taskWebsiteButton');
+                }
+
+                if (!employeeWebsiteButtonEnabled) {
+                    hideElement('openEmployeeWebsite');
+                }
+
+                if (!timesheetWebsiteButtonEnabled) {
+                    hideElement('openTimesheetWebsite');
+                }
+
+                if (!calendarShortcutEnabled) {
+                    hideElement('openCalendar');
+                }
 
                 let additionalButtonsEnabled = employeeWebsiteButtonEnabled || timesheetWebsiteButtonEnabled || calendarShortcutEnabled;
-                hideElement('additionalSiteButtons', additionalButtonsEnabled);
+                if (!additionalButtonsEnabled) {
+                    hideElement('additionalSiteButtons');
+                }
 
-                let isUpToDate = extension_version === localExtensionVersion;
+                if (!updateAvailable || ignoreUpdatePrompt) {
+                    hideElement('updateAvailableNotification');
+                }
+
+                let isUpToDate = EXTENSION_VERSION === localExtensionVersion;
                 let updateNotificationsEnabled = getValue(data, 'updateNotificationsSetting', true);
-                hideElement('updateNotification', updateNotificationsEnabled && !isUpToDate);
-                if (updateNotificationsEnabled && !isUpToDate) {
+                let updateNotificationsVisible = updateNotificationsEnabled && !isUpToDate && !updateAvailable;
+                if (updateNotificationsVisible) {
                     let updateText = document.getElementById('updateText');
-                    updateText.innerText = "What's New in Version "  + extension_version;
+                    updateText.innerText = "What's New in Version "  + EXTENSION_VERSION;
+                } else {
+                    hideElement('updateNotification');
                 }
 
                 let buttonDividerEnabled = taskWebsiteButtonEnabled || additionalButtonsEnabled;
-                hideElement('buttonDivider', buttonDividerEnabled);
+                if (!buttonDividerEnabled) {
+                    hideElement('buttonDivider');
+                }
             });
         });
     });
