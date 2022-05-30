@@ -139,7 +139,7 @@
             display: none;
         }
 
-        #hideTableCell {
+        .hideTableCell {
             visibility:collapse;
         }
     </style>
@@ -193,6 +193,8 @@
                             <br>
                             <input type="checkbox" id="timekeepingEstimated"> Enable synchronization with internal
                             Lionbridge task timer <br> (uses an estimate of network delay)
+                            <br>
+                            <input type="checkbox" id="displayTimeInHoursMinutes"> Display recorded time on the calendar in hours and minutes
                         </div>
                         <div class="column">
                             <b>Pop-up Settings</b>
@@ -299,7 +301,7 @@
                     <br>
                     <table id="weeklyView">
                         <tr>
-                            <th id="hideTableCell"></th>
+<!--                            <th class="hideTableCell"></th>-->
                             <th>Sunday</th>
                             <th>Monday</th>
                             <th>Tuesday</th>
@@ -310,7 +312,7 @@
                             <th></th>
                         </tr>
                         <tr>
-                            <th id="hideTableCell"></th>
+<!--                            <th class="hideTableCell"></th>-->
                             <th id="day0">Date</th>
                             <th id="day1">Date</th>
                             <th id="day2">Date</th>
@@ -321,7 +323,7 @@
                             <th>Total</th>
                         </tr>
                         <tr>
-                            <th>Regular</th>
+<!--                            <th>Regular</th>-->
                             <td id="day0Total">0.00 hours</td>
                             <td id="day1Total">0.00 hours</td>
                             <td id="day2Total">0.00 hours</td>
@@ -331,40 +333,73 @@
                             <td id="day6Total">0.00 hours</td>
                             <td id="weekTotal">0.00 hours</td>
                         </tr>
-                        <tr>
-                            <th>Training</th>
-                            <td id="day0TrainingTotal">0.00 hours</td>
-                            <td id="day1TrainingTotal">0.00 hours</td>
-                            <td id="day2TrainingTotal">0.00 hours</td>
-                            <td id="day3TrainingTotal">0.00 hours</td>
-                            <td id="day4TrainingTotal">0.00 hours</td>
-                            <td id="day5TrainingTotal">0.00 hours</td>
-                            <td id="day6TrainingTotal">0.00 hours</td>
-                            <td id="weekTrainingTotal">0.00 hours</td>
-                        </tr>
-                        <tr>
-                            <td id="hideTableCell"></td>
-                            <td id="hideTableCell"></td>
-                            <td id="hideTableCell"></td>
-                            <td id="hideTableCell"></td>
-                            <td id="hideTableCell"></td>
-                            <td id="hideTableCell"></td>
-                            <td id="hideTableCell"></td>
-                            <td id="hideTableCell"></td>
-                            <td>0.00 hours</td>
-                        </tr>
+<!--                        <tr>-->
+<!--                            <th>Training</th>-->
+<!--                            <td id="day0TrainingTotal">0.00 hours</td>-->
+<!--                            <td id="day1TrainingTotal">0.00 hours</td>-->
+<!--                            <td id="day2TrainingTotal">0.00 hours</td>-->
+<!--                            <td id="day3TrainingTotal">0.00 hours</td>-->
+<!--                            <td id="day4TrainingTotal">0.00 hours</td>-->
+<!--                            <td id="day5TrainingTotal">0.00 hours</td>-->
+<!--                            <td id="day6TrainingTotal">0.00 hours</td>-->
+<!--                            <td id="weekTrainingTotal">0.00 hours</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td id="hideTableCell"></td>-->
+<!--                            <td>0.00 hours</td>-->
+<!--                        </tr>-->
                     </table>
                 </div>
 
                 <div id="changelogContent">
                     Select a version:
                     <select id="versionSelect">
+                        <option value="version_1_2_0">1.2.0</option>
                         <option value="version_1_1_0">1.1.0</option>
                         <option value="version_1_0_0">1.0.0</option>
                     </select>
                     <div id="changelogInfo">
-                        <h2 id="changelogVersion">Version 1.1.0 Changelog</h2>
-                        <div id="version_1_1_0" class="latestVersion">
+                        <h2 id="changelogVersion">Version 1.2.0 Changelog</h2>
+                        <div id="version_1_2_0" class="latestVersion">
+                            <h1>What's New</h1>
+                            <p>
+                                This update is coming to those of you who have been using this extension for a year or longer.
+                                If you've faced some problems with task times not getting recorded, this update addresses that
+                                issue. I'm also aware that there have been some changes in the rating program, particular the
+                                acquisition of the Lionbridge Technologies arm. So there's a small tweak that should make your
+                                life a little easier there as well.
+                            </p>
+                            <h4>Fresh Additions</h4>
+                            <ul>
+                                <li>Counting the hours and the minutes
+                                    <p>
+                                        You can now enable a new setting to display your worked hours in hour and minutes  in
+                                        the weekly calendar to reflect the new timekeeping system. By default, you'll still see
+                                        hours displayed in decimal format.
+                                    </p>
+                                </li>
+                            </ul>
+
+                            <h4>Changes for the Ages</h4>
+                            <ul>
+                                <li>Breaking the stone tablet
+                                    <p>
+                                        We've recorded our working history in the stone tablet of Google Sync storage. Unfortunately,
+                                        for those of you who have worked for a year or longer, you may have run out of space to
+                                        continue recording your work. The resolve this critical issue, your saved data will be
+                                        reduced to only include the last year of activity.
+                                    </p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="version_1_1_0" class="oldVersion">
                             <h1>What's New</h1>
                             <p>For this update, changes were made to allow Rating Tracker to evolve beyond its simple beginnings.
                                 There are some exciting ideas floating about that will eventually make their way to YOU, but there

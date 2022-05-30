@@ -1,7 +1,7 @@
 /*
     INTERNAL VERSION
  */
-const EXTENSION_VERSION = "1.1.0";
+const EXTENSION_VERSION = "1.2.0";
 
 let settingsButton = document.getElementById('openSettings');
 settingsButton.onclick = function() {

@@ -51,6 +51,17 @@ function clearBadgeText() {
   chrome.browserAction.setBadgeText({text: ''});
 }
 
+/***
+ * Calculates the number of days that have passed since the provided Date object
+ * @param date - Date object
+ */
+function getDaysSinceDate(date){
+  const today = new Date()
+  const millisecondsSinceDate = today.getTime() - date.getTime()
+
+  return Math.floor(millisecondsSinceDate / (24 * 60 * 60 * 1000))
+}
+
 /**
  * Returns a string that can be used to lookup work data from a particular day.
  * @param {Object} dateObj that represents that day you want to look up
@@ -70,9 +81,23 @@ function getDateKey() {
   return getSpecificDateKey(date);
 }
 
+function getLastYearsDateKey() {
+  const lastYear = new Date();
+  lastYear.setFullYear(date.getFullYear() - 1)
+
+  return getSpecificDateKey(lastYear)
+}
+
+function saveMinutesInGoogleStorage(dateString, totalMinutes) {
+  chrome.storage.sync.set({[dateString] : totalMinutes}, function() {
+    console.log("Logging " + minutesWorked + " minutes for a total of " + totalMinutes + " minutes.")
+  });
+}
+
 function submitHours() {
   const dateString = getDateKey();
-  chrome.storage.sync.get(dateString, (data) => {
+  const lastYearDateString = getLastYearsDateKey();
+  chrome.storage.sync.get([dateString, lastYearDateString], (data) => {
     chrome.storage.local.get(['taskTimestamp', 'taskTime'], (taskInfo) => {
       let taskTimeLimit = taskInfo['taskTime'];
       let currentTime = new Date().getTime(); // time in milliseconds
@@ -85,9 +110,15 @@ function submitHours() {
       let minutesRecorded = getValue(data, dateString, 0.0);
       let totalMinutes = minutesRecorded + minutesWorked;
 
-      chrome.storage.sync.set({[dateString] : totalMinutes}, function() {
-        console.log("Logging " + minutesWorked + " minutes for a total of " + totalMinutes + " minutes.")
-      });
+      if (data[lastYearDateString]) {
+        // remove old expired entry before trying to store the new one
+        chrome.storage.sync.remove(lastYearDateString, () => {
+          saveMinutesInGoogleStorage(dateString, totalMinutes)
+        })
+      } else {
+        saveMinutesInGoogleStorage(dateString, totalMinutes)
+      }
+
       chrome.storage.local.set({'taskActive': false});
     })
   });
@@ -307,6 +338,7 @@ function verifySettingsIntegrity() {
     'updateNotificationsEnabled': true,
     'taskCompletionNotificationsEnabled': true,
     'timekeepingEstimatedSetting': false,
+    'displayTimeInHoursMinutesSetting': false,
     'soundTaskRefreshTimeoutSetting': false,
     'calendarShortcutSetting': false
   };
@@ -327,9 +359,40 @@ function verifySettingsIntegrity() {
   });
 }
 
+/**
+ * There's an issue where the user hits the max amount of entries available in Google Sync of 500. The solution was
+ * to clear out the old data (keeping only the last 365 days of data) and to only store data from the last 365 days.
+ */
+function removeOldData() {
+  // get all entries from google sync storage
+  chrome.storage.sync.get(null, (dataItemStore) => {
+    const dataItemsToRemoveFromStorage = []
+
+    for (const key in dataItemStore) {
+      const dataItem = dataItemStore[key]
+      if (dataItem) {
+        const isDate = new RegExp('\\d{1,2}/\\d{1,2{/\\d{4}')
+        if (isDate.test(dataItem)) {
+          const date = new Date(dataItem) // the date format is 1/1/2022
+          if (getDaysSinceDate(date) > 365) {
+            dataItemsToRemoveFromStorage.push(key)
+          }
+        }
+      }
+    }
+
+    if (dataItemsToRemoveFromStorage.length > 0) {
+      chrome.storage.sync.remove(dataItemsToRemoveFromStorage, () => {
+        console.log('Successfully cleared old data from Google Sync storage. Removed a total of ' +
+            dataItemsToRemoveFromStorage.length + ' items.')
+      })
+    }
+  })
+}
+
 chrome.runtime.onStartup.addListener(verifySettingsIntegrity);
 chrome.runtime.onInstalled.addListener((details) => {
   chrome.storage.local.set({'updateAvailable' : false});
   chrome.storage.local.set({'ignoreUpdatePrompt' : false});
-  verifySettingsIntegrity;
+  verifySettingsIntegrity();
 });

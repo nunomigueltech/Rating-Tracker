@@ -98,20 +98,17 @@ function loadWeek(dateObject, dayCounter, minutes) {
     let dayString = dateObject.toDateString();
     dateEntries[dayCounter].innerHTML = dayString.substring(4);
     let dayKey = dateObject.getMonth() + '/' + dateObject.getDate() + '/' + dateObject.getFullYear();
-    chrome.storage.sync.get(dayKey, (data) => {
+    chrome.storage.sync.get([dayKey, 'displayTimeInHoursMinutesSetting'], (data) => {
         let minutesWorked = (typeof data[dayKey] === 'undefined')? 0.0 : parseInt(data[dayKey]);
-        let hoursWorked = minutesWorked/60.0;
-
         minutes += minutesWorked;
-        hourEntries[dayCounter].innerHTML = hoursWorked.toFixed(2) + ' hours';
+
+        hourEntries[dayCounter].innerHTML = getTimeWorkedString(minutesWorked, data['displayTimeInHoursMinutesSetting']);
         if (dayCounter == 6) {
             // when all entries are loaded for the week, store the total and update
             // the navigation label
             let navigationLabel = document.getElementById('navigationHeader');
             navigationLabel.innerHTML = dateEntries[0].innerHTML + ' - ' + dateEntries[6].innerHTML;
-
-            let hoursWorked = minutes/60;
-            hourEntries[7].innerHTML = hoursWorked.toFixed(2) + ' hours';
+            hourEntries[7].innerHTML = getTimeWorkedString(minutes, data['displayTimeInHoursMinutesSetting']);
         }
       
         dateObject.setDate(dateObject.getDate() + 1);
@@ -126,6 +123,17 @@ function loadHourView() {
     // move date to the beginning of the week
     date.setDate(date.getDate() - date.getDay() + (weekOffset * 7));
     loadWeek(date, 0, 0.0);
+}
+
+function getTimeWorkedString(minutesWorked, shouldDisplayTimeInHoursMinutes) {
+    if (shouldDisplayTimeInHoursMinutes) {
+        const hoursWorked = minutesWorked/60.0;
+        const leftoverMinutesWorked = minutesWorked % 60;
+        return hoursWorked.toFixed(0) + ' hrs. ' + leftoverMinutesWorked + ' mins.';
+    } else {
+        const hoursWorked = minutesWorked/60.0;
+        return hoursWorked.toFixed(2) + ' hours'
+    }
 }
 
 let previousWeekButton = document.getElementById('prevWeekButton');
@@ -240,7 +248,8 @@ function loadSettings() {
                              'beforeGoalNotificationsSetting', 'notificationMinutes',
                              'goalNotificationsSetting', 'updateNotificationsSetting',
                              'taskCompletionNotificationsSetting', 'timekeepingEstimatedSetting',
-                             'soundTaskRefreshTimeoutSetting', 'calendarShortcutSetting'] ,
+                             'displayTimeInHoursMinutesSetting', 'soundTaskRefreshTimeoutSetting',
+                             'calendarShortcutSetting'] ,
                     function(data) {
 
         let minTime = getValue(data['minTime'], 30);
@@ -268,6 +277,7 @@ function loadSettings() {
         let updateNotificationsEnabled = getValue(data['updateNotificationsSetting'], true);
         let taskCompletionNotificationsEnabled = getValue(data['taskCompletionNotificationsSetting'], true);
         let timekeepingEstimatedEnabled = getValue(data['timekeepingEstimatedSetting'], false);
+        let displayTimeInHoursMinutesEnabled = getValue(data['displayTimeInHoursMinutesSetting'], false);
         let soundTaskRefreshTimeoutEnabled = getValue(data['soundTaskRefreshTimeoutSetting'], false);
         let calendarShortcutEnabled = getValue(data['calendarShortcutSetting'], false);
 
@@ -301,6 +311,7 @@ function loadSettings() {
         document.getElementById('updateNotificationsEnabled').checked = updateNotificationsEnabled;
         document.getElementById('taskCompletionNotificationsEnabled').checked = taskCompletionNotificationsEnabled;
         document.getElementById('timekeepingEstimated').checked = timekeepingEstimatedEnabled;
+        document.getElementById('displayTimeInHoursMinutes').checked = displayTimeInHoursMinutesEnabled;
         document.getElementById('soundTaskRefreshTimeout').checked = soundTaskRefreshTimeoutEnabled;
         document.getElementById('calendarShortcut').checked = calendarShortcutEnabled;
         updateRefreshFields(!refreshEnabled);
@@ -333,6 +344,7 @@ function saveSettings() {
     let updateNotificationsSetting = document.getElementById('updateNotificationsEnabled').checked;
     let taskCompletionNotificationsSetting = document.getElementById('taskCompletionNotificationsEnabled').checked;
     let timekeepingEstimatedSetting = document.getElementById('timekeepingEstimated').checked;
+    let displayTimeInHoursMinutesSetting = document.getElementById('displayTimeInHoursMinutes').checked;
     let soundTaskRefreshTimeoutSetting = document.getElementById('soundTaskRefreshTimeout').checked;
     let calendarShortcutSetting = document.getElementById('calendarShortcut').checked;
 
@@ -355,8 +367,12 @@ function saveSettings() {
         'dailyHourGoal': dailyHourGoal, 'weeklyHourGoal': weeklyHourGoal, 'goalNotificationsSetting': goalNotificationsSetting,
         'beforeGoalNotificationsSetting': beforeGoalNotificationsSetting, 'notificationMinutes' : notificationMinutes,
         'updateNotificationsSetting': updateNotificationsSetting, 'taskCompletionNotificationsSetting': taskCompletionNotificationsSetting,
-        'timekeepingEstimatedSetting': timekeepingEstimatedSetting, 'soundTaskRefreshTimeoutSetting': soundTaskRefreshTimeoutSetting,
-        'calendarShortcutSetting': calendarShortcutSetting});
+        'timekeepingEstimatedSetting': timekeepingEstimatedSetting, 'displayTimeInHoursMinutesSetting': displayTimeInHoursMinutesSetting,
+        'soundTaskRefreshTimeoutSetting': soundTaskRefreshTimeoutSetting, 'calendarShortcutSetting': calendarShortcutSetting},
+        () => {
+            // re-render the weekly view after settings are saved
+            loadHourView();
+        });
 }
 
 let saveButton = document.getElementById('saveSettings');
